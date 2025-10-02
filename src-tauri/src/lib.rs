@@ -1,8 +1,9 @@
 use hex::encode;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sha1::Digest;
 use std::io::Read;
 use tauri::{AppHandle, Manager, Runtime, Window};
+use tauri_plugin_updater::UpdaterExt;
 
 fn md5_hash(value: &str) -> String {
     let mut hasher = md5::Md5::new();
@@ -139,9 +140,34 @@ fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
         .unwrap()
 }
 
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+  if let Some(update) = app.updater()?.check().await? {
+    let mut downloaded = 0;
+
+    // alternatively we could also call update.download() and update.install() separately
+    update
+      .download_and_install(
+        |chunk_length, content_length| {
+          downloaded += chunk_length;
+          println!("downloaded {downloaded} from {content_length:?}");
+        },
+        || {
+          println!("download finished");
+        },
+      )
+      .await?;
+
+    println!("update installed");
+    app.restart();
+  }
+
+  Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
@@ -155,6 +181,13 @@ pub fn run() {
             get_window_always_on_top,
             set_window_always_on_top
         ])
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                update(handle).await.unwrap();
+            });
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

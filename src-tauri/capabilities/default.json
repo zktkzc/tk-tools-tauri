@@ -9,6 +9,7 @@
     "dialog:default",
     "dialog:allow-open",
     "store:default",
-    "store:allow-load"
+    "store:allow-load",
+    "updater:default"
   ]
 }

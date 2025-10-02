@@ -1,13 +1,12 @@
 name: Release
 
-permissions:
-  contents: write
-
 on:
   workflow_dispatch: # 允许手动触发
 
 jobs:
-  build:
+  publish-tauri:
+    permissions:
+      contents: write
     name: Build and Publish ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -62,25 +61,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Build Tauri app
+      - name: Build And Publish
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
+          tagName: v__VERSION__
+          releaseName: 'v__VERSION__'
+          releaseBody: 'See the assets to download this version and install.'
+          releaseDraft: true
+          includeUpdaterJson: true
+          prerelease: false
           args: ${{ matrix.args }}
-
-      - name: Upload Artifact And Create Release Draft
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          files: |
-            src-tauri/target/**/*TK Tools*.exe
-            src-tauri/target/**/*TK Tools*.zip
-            src-tauri/target/**/*TK Tools*.dmg
-            src-tauri/target/**/*TK Tools*.AppImage
-            src-tauri/target/**/*TK Tools*.snap
-            src-tauri/target/**/*TK Tools*.deb
-            src-tauri/target/**/*TK Tools*.rpm
-            src-tauri/target/**/*TK Tools*.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
