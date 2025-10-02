@@ -1,0 +1,75 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  build:
+    name: Build and Publish ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: MacOS
+            os: macOS-latest
+          - name: Ubuntu
+            os: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install webkit2gtk
+
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install -y visualstudio2022-workload-vctools
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            src-tauri/release/target/bundle/**/*.exe
+            src-tauri/release/target/bundle/**/*.zip
+            src-tauri/release/target/bundle/**/*.dmg
+            src-tauri/release/target/bundle/**/*.AppImage
+            src-tauri/release/target/bundle/**/*.snap
+            src-tauri/release/target/bundle/**/*.deb
+            src-tauri/release/target/bundle/**/*.rpm
+            src-tauri/release/target/bundle/**/*.tar.gz
+            src-tauri/release/target/bundle/**/*.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
