@@ -69,13 +69,13 @@ jobs:
         with:
           draft: true
           files: |
-            src-tauri/target/release/bundle/**/*.exe
-            src-tauri/target/release/bundle/**/*.zip
-            src-tauri/target/release/bundle/**/*.dmg
-            src-tauri/target/release/bundle/**/*.AppImage
-            src-tauri/target/release/bundle/**/*.snap
-            src-tauri/target/release/bundle/**/*.deb
-            src-tauri/target/release/bundle/**/*.rpm
-            src-tauri/target/release/bundle/**/*.tar.gz
+            src-tauri/target/**/*.exe
+            src-tauri/target/**/*.zip
+            src-tauri/target/**/*.dmg
+            src-tauri/target/**/*.AppImage
+            src-tauri/target/**/*.snap
+            src-tauri/target/**/*.deb
+            src-tauri/target/**/*.rpm
+            src-tauri/target/**/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
