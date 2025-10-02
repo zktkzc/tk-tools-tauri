@@ -46,10 +46,15 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Setup Rust
+      - name: Setup Rust(Macos Arm)
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.os == 'macos-latest' && contains(matrix.name, 'arm') && 'aarch64-apple-darwin' || '' }}
+
+      - name: Setup Rust(Macos Intel)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && contains(matrix.name, 'intel') && 'x86_64-apple-darwin' || '' }}
 
       - name: Install dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -69,13 +74,13 @@ jobs:
         with:
           draft: true
           files: |
-            src-tauri/target/**/*.exe
-            src-tauri/target/**/*.zip
-            src-tauri/target/**/*.dmg
-            src-tauri/target/**/*.AppImage
-            src-tauri/target/**/*.snap
-            src-tauri/target/**/*.deb
-            src-tauri/target/**/*.rpm
-            src-tauri/target/**/*.tar.gz
+            src-tauri/target/**/*TK Tools*.exe
+            src-tauri/target/**/*TK Tools*.zip
+            src-tauri/target/**/*TK Tools*.dmg
+            src-tauri/target/**/*TK Tools*.AppImage
+            src-tauri/target/**/*TK Tools*.snap
+            src-tauri/target/**/*TK Tools*.deb
+            src-tauri/target/**/*TK Tools*.rpm
+            src-tauri/target/**/*TK Tools*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
