@@ -16,10 +16,16 @@ jobs:
         include:
           - name: Windows
             os: windows-latest
-          - name: MacOS
+            args: ''
+          - name: MacOS(arm)
             os: macOS-latest
+            args: '--target aarch64-apple-darwin'
+          - name: MacOS(intel)
+            os: macOS-latest
+            args: '--target x86_64-apple-darwin'
           - name: Ubuntu
             os: ubuntu-latest
+            args: ''
 
     steps:
       - name: Checkout code
@@ -28,47 +34,28 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 22.18.0
+          node-version: lts/*
 
       - name: Install dependencies
         run: npm install
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Install dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Install dependencies (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install webkit2gtk
-
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install -y visualstudio2022-workload-vctools
-
-      - name: release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          files: |
-            src-tauri/release/target/bundle/**/*.exe
-            src-tauri/release/target/bundle/**/*.zip
-            src-tauri/release/target/bundle/**/*.dmg
-            src-tauri/release/target/bundle/**/*.AppImage
-            src-tauri/release/target/bundle/**/*.snap
-            src-tauri/release/target/bundle/**/*.deb
-            src-tauri/release/target/bundle/**/*.rpm
-            src-tauri/release/target/bundle/**/*.tar.gz
-            src-tauri/release/target/bundle/**/*.yml
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
         env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.args }}
+          releaseDraft: true
+          prerelease: false
+          releaseName: 'v__VERSION__'
