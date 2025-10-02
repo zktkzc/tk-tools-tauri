@@ -4179,7 +4179,7 @@ dependencies = [
 
 [[package]]
 name = "tk-tools-tauri"
-version = "0.1.0"
+version = "1.0.1"
 dependencies = [
  "hex",
  "md-5",

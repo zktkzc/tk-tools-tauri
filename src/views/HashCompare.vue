@@ -71,7 +71,7 @@ const check = () => {
 
 <template>
   <div
-    class="w-[calc(100wh-10px)] h-[calc(100vh-152px)] m-2 flex flex-col justify-center gap-2 dark:bg-[#252525]"
+    class="w-full h-full p-2 flex flex-col justify-center gap-2 dark:bg-[#252525]"
     style="user-select: none"
   >
     <div class="w-full h-[200px]">
@@ -154,6 +154,7 @@ const check = () => {
   @apply text-xs dark:bg-[#212123] dark:text-slate-300;
   box-shadow: none !important;
   outline: none;
+  border: #dcdfe6 solid 1px;
 
   @media (prefers-color-scheme: dark) {
     border: #4c4d4f solid 1px;
