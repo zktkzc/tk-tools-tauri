@@ -139,12 +139,6 @@ fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
         .unwrap()
 }
 
-#[derive(Serialize, Deserialize)]
-#[allow(dead_code)]
-struct AppConfig {
-    theme: String,
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
