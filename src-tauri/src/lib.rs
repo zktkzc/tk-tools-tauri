@@ -140,6 +140,7 @@ fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
 }
 
 #[derive(Serialize, Deserialize)]
+#[allow(dead_code)]
 struct AppConfig {
     theme: String,
 }

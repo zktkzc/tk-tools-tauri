@@ -55,7 +55,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
@@ -63,6 +63,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.args }}
-          releaseDraft: true
-          prerelease: false
-          releaseName: 'v__VERSION__'
+
+      - name: Upload Artifact And Create Release Draft
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.zip
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.snap
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
