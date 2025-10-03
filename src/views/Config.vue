@@ -8,7 +8,7 @@ import {computedAsync} from '@vueuse/core'
 import {invoke} from "@tauri-apps/api/core"
 import {getCurrentWindow} from '@tauri-apps/api/window'
 import {eventBus} from "../utils/eventBus.ts"
-import {set, get} from "../store/AppConfigStore.ts"
+import {get, set} from "../store/AppConfigStore.ts"
 import config from '../../package.json'
 
 const {setSettings, getSettings} = useSettingsStore()
@@ -33,8 +33,7 @@ const changeAutoUpdate = async (value: boolean) => {
 }
 
 const checkUpdate = async () => {
-  const result = await invoke('check_update')
-  console.log(result)
+  await invoke('check_update')
 }
 
 const initSettings = async () => {
@@ -48,7 +47,7 @@ const initSettings = async () => {
     }
   }
   if (!oldSettings.theme) oldSettings.theme = 'system'
-  if (!oldSettings.autoUpdate) oldSettings.autoUpdate = true
+  if (oldSettings.autoUpdate === undefined) oldSettings.autoUpdate = true
   settings.value = oldSettings
   await set('settings', settings.value)
 }
@@ -113,7 +112,7 @@ onUnmounted(() => {
           <el-form-item label="当前版本">
             <div>v&nbsp;{{ config.version }}</div>
             <div class="pl-5">
-              <el-button @click="checkUpdate">检测更新</el-button>
+              <el-button @click="checkUpdate">检查更新</el-button>
             </div>
           </el-form-item>
         </el-form>

@@ -2,7 +2,8 @@ use hex::encode;
 use serde::Serialize;
 use sha1::Digest;
 use std::io::Read;
-use tauri::{AppHandle, Manager, Runtime, Window};
+use tauri::{AppHandle, Manager};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_store::StoreExt;
 use tauri_plugin_updater::UpdaterExt;
 
@@ -102,8 +103,8 @@ fn calculate_file_hash(path: &str) -> HashResult {
 }
 
 #[tauri::command]
-fn get_theme<R: Runtime>(window: Window<R>) -> String {
-    match window.theme().unwrap() {
+fn get_theme(app: AppHandle) -> String {
+    match app.get_webview_window("main").unwrap().theme().unwrap() {
         tauri::Theme::Light => "light".to_string(),
         tauri::Theme::Dark => "dark".to_string(),
         _ => panic!("Get system theme error"),
@@ -111,7 +112,8 @@ fn get_theme<R: Runtime>(window: Window<R>) -> String {
 }
 
 #[tauri::command]
-fn change_theme<R: Runtime>(window: Window<R>, value: &str) {
+fn change_theme(app: AppHandle, value: &str) {
+    let window = app.get_webview_window("main").unwrap();
     match value {
         "light" => window.set_theme(Some(tauri::Theme::Light)).unwrap(),
         "dark" => window.set_theme(Some(tauri::Theme::Dark)).unwrap(),
@@ -121,12 +123,12 @@ fn change_theme<R: Runtime>(window: Window<R>, value: &str) {
 }
 
 #[tauri::command]
-fn open_dev_tools<R: Runtime>(app: AppHandle<R>) {
+fn open_dev_tools(app: AppHandle) {
     app.get_webview_window("main").unwrap().open_devtools()
 }
 
 #[tauri::command]
-fn get_window_always_on_top<R: Runtime>(app: AppHandle<R>) -> bool {
+fn get_window_always_on_top(app: AppHandle) -> bool {
     app.get_webview_window("main")
         .unwrap()
         .is_always_on_top()
@@ -134,7 +136,7 @@ fn get_window_always_on_top<R: Runtime>(app: AppHandle<R>) -> bool {
 }
 
 #[tauri::command]
-fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
+fn set_window_always_on_top(app: AppHandle, value: bool) {
     app.get_webview_window("main")
         .unwrap()
         .set_always_on_top(value)
@@ -143,6 +145,25 @@ fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
 
 #[tauri::command]
 async fn check_update(app: AppHandle) {
+    if let Some(update) = app.updater().unwrap().check().await.unwrap() {
+        let ans = app
+            .dialog()
+            .message(format!("发现新版本v{}，是否要更新？", update.version))
+            .title("软件更新")
+            .kind(MessageDialogKind::Info)
+            .buttons(MessageDialogButtons::OkCancelCustom(
+                "确定".to_string(),
+                "取消".to_string(),
+            ))
+            .blocking_show();
+        if ans {
+            update_app(app);
+        }
+    }
+}
+
+#[tauri::command]
+fn update_app(app: AppHandle) {
     let handle = app.clone();
     tauri::async_runtime::spawn(async move {
         update(handle).await.unwrap();
@@ -158,16 +179,24 @@ async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
             .download_and_install(
                 |chunk_length, content_length| {
                     downloaded += chunk_length;
-                    println!("downloaded {downloaded} from {content_length:?}");
+                    println!("下载中: {downloaded}/{content_length:?}");
                 },
                 || {
-                    println!("download finished");
+                    println!("下载完成");
                 },
             )
             .await?;
 
-        println!("update installed");
-        app.restart();
+        let ans = app
+            .dialog()
+            .message("下载完成，点击重启软件")
+            .kind(MessageDialogKind::Info)
+            .title("软件更新")
+            .buttons(MessageDialogButtons::OkCustom("确定".to_string()))
+            .blocking_show();
+        if ans {
+            app.restart();
+        }
     }
 
     Ok(())
@@ -176,10 +205,10 @@ async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             calculate_hash,
@@ -189,25 +218,32 @@ pub fn run() {
             open_dev_tools,
             get_window_always_on_top,
             set_window_always_on_top,
-            check_update
+            check_update,
+            update_app
         ])
         .setup(|app| {
             // 读取配置文件，设置窗口主题
-            let store = app.store("config.json").unwrap();
-            let settings = store.get("settings").unwrap();
-            change_theme(
-                app.get_window("main").unwrap(),
-                settings["theme"].as_str().unwrap(),
-            );
-            store.close_resource();
+            let store = match app.store("config.json") {
+                Ok(s) => Some(s),
+                Err(_) => None,
+            };
 
-            // 软件启动时检测更新
-            if settings["autoUpdate"].as_bool().unwrap() {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    update(handle).await.unwrap();
-                });
+            if store.is_some() {
+                let store = store.unwrap();
+                match store.get("settings") {
+                    Some(settings) => {
+                        change_theme(app.handle().clone(), settings["theme"].as_str().unwrap());
+                        store.close_resource();
+
+                        // 软件启动时检测更新
+                        if settings["autoUpdate"].as_bool().unwrap() {
+                            update_app(app.handle().clone())
+                        }
+                    }
+                    None => {}
+                }
             }
+
             Ok(())
         })
         .run(tauri::generate_context!())
