@@ -3,6 +3,7 @@ use serde::Serialize;
 use sha1::Digest;
 use std::io::Read;
 use tauri::{AppHandle, Manager, Runtime, Window};
+use tauri_plugin_store::StoreExt;
 use tauri_plugin_updater::UpdaterExt;
 
 fn md5_hash(value: &str) -> String {
@@ -140,28 +141,36 @@ fn set_window_always_on_top<R: Runtime>(app: AppHandle<R>, value: bool) {
         .unwrap()
 }
 
-async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-  if let Some(update) = app.updater()?.check().await? {
-    let mut downloaded = 0;
+#[tauri::command]
+async fn check_update(app: AppHandle) {
+    let handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        update(handle).await.unwrap();
+    });
+}
 
-    // alternatively we could also call update.download() and update.install() separately
-    update
-      .download_and_install(
-        |chunk_length, content_length| {
-          downloaded += chunk_length;
-          println!("downloaded {downloaded} from {content_length:?}");
-        },
-        || {
-          println!("download finished");
-        },
-      )
-      .await?;
+async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
+    if let Some(update) = app.updater()?.check().await? {
+        let mut downloaded = 0;
 
-    println!("update installed");
-    app.restart();
-  }
+        // alternatively we could also call update.download() and update.install() separately
+        update
+            .download_and_install(
+                |chunk_length, content_length| {
+                    downloaded += chunk_length;
+                    println!("downloaded {downloaded} from {content_length:?}");
+                },
+                || {
+                    println!("download finished");
+                },
+            )
+            .await?;
 
-  Ok(())
+        println!("update installed");
+        app.restart();
+    }
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -179,13 +188,26 @@ pub fn run() {
             change_theme,
             open_dev_tools,
             get_window_always_on_top,
-            set_window_always_on_top
+            set_window_always_on_top,
+            check_update
         ])
         .setup(|app| {
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                update(handle).await.unwrap();
-            });
+            // 读取配置文件，设置窗口主题
+            let store = app.store("config.json").unwrap();
+            let settings = store.get("settings").unwrap();
+            change_theme(
+                app.get_window("main").unwrap(),
+                settings["theme"].as_str().unwrap(),
+            );
+            store.close_resource();
+
+            // 软件启动时检测更新
+            if settings["autoUpdate"].as_bool().unwrap() {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    update(handle).await.unwrap();
+                });
+            }
             Ok(())
         })
         .run(tauri::generate_context!())
