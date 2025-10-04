@@ -1,6 +1,6 @@
 [package]
 name = "tk-tools-tauri"
-version = "1.2.0"
+version = "1.2.1"
 description = "TK Tools测试常用工具箱"
 authors = ["tkzc00"]
 edition = "2021"

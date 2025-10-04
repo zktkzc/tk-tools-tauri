@@ -145,21 +145,7 @@ fn set_window_always_on_top(app: AppHandle, value: bool) {
 
 #[tauri::command]
 async fn check_update(app: AppHandle) {
-    if let Some(update) = app.updater().unwrap().check().await.unwrap() {
-        let ans = app
-            .dialog()
-            .message(format!("发现新版本v{}，是否要更新？", update.version))
-            .title("软件更新")
-            .kind(MessageDialogKind::Info)
-            .buttons(MessageDialogButtons::OkCancelCustom(
-                "确定".to_string(),
-                "取消".to_string(),
-            ))
-            .blocking_show();
-        if ans {
-            update_app(app);
-        }
-    }
+    update_app(app)
 }
 
 #[tauri::command]
@@ -172,6 +158,20 @@ fn update_app(app: AppHandle) {
 
 async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
     if let Some(update) = app.updater()?.check().await? {
+        let ans = app
+            .dialog()
+            .message(format!("发现新版本v{}，是否要更新？", update.version))
+            .title("软件更新")
+            .kind(MessageDialogKind::Info)
+            .buttons(MessageDialogButtons::OkCancelCustom(
+                "确定".to_string(),
+                "取消".to_string(),
+            ))
+            .blocking_show();
+        if !ans {
+            return Ok(());
+        }
+
         let mut downloaded = 0;
 
         // alternatively we could also call update.download() and update.install() separately
@@ -237,7 +237,7 @@ pub fn run() {
 
                         // 软件启动时检测更新
                         if settings["autoUpdate"].as_bool().unwrap() {
-                            update_app(app.handle().clone())
+                            update_app(app.handle().clone());
                         }
                     }
                     None => {}
