@@ -76,7 +76,6 @@ jobs:
           includeRelease: true
           includeUpdaterJson: true
           updaterJsonKeepUniversal: true
-          updaterJsonPreferNsis: true
           prerelease: false
           args: ${{ matrix.args }}
           assetNamePattern: '[name]_[version]_[platform]_[arch][ext]'
