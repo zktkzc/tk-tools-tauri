@@ -2,6 +2,8 @@
 
 使用Tauri2+Vue3编写的测试常用工具箱
 
+[Electron 版本](https://github.com/zktkzc/TK-Tools)(已不更新)
+
 ## 软件功能
 
 - [X] JSON格式化
@@ -13,7 +15,7 @@
 - [X] 生成固定长度的随机字符
 - [X] 生成UUID
 - [X] 文本比对
-- [ ] 自动更新
+- [X] 自动更新
 
 ## 软件界面
 
