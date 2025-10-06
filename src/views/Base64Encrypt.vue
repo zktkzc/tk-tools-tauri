@@ -26,6 +26,8 @@ const hasPad = ref<boolean>(false)
 const fileCalcFlag = ref<'data-url' | 'css' | 'html' | 'null'>('null')
 const filepath = ref<string>('')
 const file = computed(() => {
+  if (!filepath.value) return ''
+
   if (platform() === 'windows') {
     return filepath.value.substring(filepath.value.lastIndexOf('\\') + 1)
   } else {
@@ -54,7 +56,7 @@ const handleCommand = (type: 'text' | 'file'): void => {
 }
 
 const calcFileBase64 = (path: string) => {
-  if (!filepath.value || filepath.value === '' || path === '') return
+  if (!filepath.value || !path || filepath.value === '' || path === '') return
 
   try {
     invoke("calculate_file_base64", {path: path, safe: urlSafe.value, pad: hasPad.value, flag: fileCalcFlag.value})
@@ -134,21 +136,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-full grid grid-rows-[1fr_4fr_30px] gap-2">
-    <div class="w-full h-full relative">
-      <el-input
-          v-if="activeType === 'text'"
-          v-model="originValue"
-          type="textarea"
-          placeholder="输入..."
-          resize="none"
-          @input="handleInput"
-      />
+  <div class="w-full h-full grid grid-rows-[100px_auto_30px] gap-2">
+    <div class="h-full relative">
+      <div class="h-full" v-if="activeType === 'text'">
+        <el-input
+            v-if="activeType === 'text'"
+            v-model="originValue"
+            type="textarea"
+            placeholder="输入..."
+            resize="none"
+            @input="handleInput"
+        />
+      </div>
       <div
           v-else
-          class="h-full w-full border dark:border-[#4C4D4F] border-[#DCDFE6] hover:border-[#29a745] rounded-md"
+          class="h-full border dark:border-[#4C4D4F] border-[#DCDFE6] hover:border-[#29a745] rounded-md"
       >
-        <div class="h-full w-full flex flex-col items-center justify-center">
+        <div class="h-full flex flex-col items-center justify-center p-2">
           <el-button class="upload-btn" @click="selectFile">
             <template #icon>
               <upload-one/>
@@ -157,7 +161,8 @@ onUnmounted(() => {
           </el-button>
           <div
               v-if="file && filepath && file !== '' && filepath !== ''"
-              class="flex items-center gap-1 text-xs mt-2 text-[#A8ABB2] dark:text-[#8C9095]"
+              class="w-full flex items-center justify-center gap-1 text-xs mt-2 text-[#A8ABB2] dark:text-[#8C9095]"
+              style="user-select: none"
           >
             <check-one theme="filled"/>
             {{ file }}
@@ -196,9 +201,28 @@ onUnmounted(() => {
     </div>
     <div class="h-full flex items-center justify-center gap-2">
       <el-button @click="copy(result)">复制</el-button>
-      <el-checkbox v-model="urlSafe" @change="() => handleInput(originValue)">Url安全</el-checkbox>
-      <el-checkbox v-model="hasPad" @change="() => handleInput(originValue)">是否有填充</el-checkbox>
-      <el-radio-group v-show="activeType === 'file'" v-model="fileCalcFlag" @change="() => calcFileBase64(filepath)" fill="#29a745">
+      <el-checkbox v-model="urlSafe" @change="() => {
+        if (activeType === 'text') {
+          handleInput(originValue)
+        } else {
+          calcFileBase64(filepath)
+        }
+      }"
+      >
+        Url安全
+      </el-checkbox>
+      <el-checkbox v-model="hasPad" @change="() => {
+        if (activeType === 'text') {
+          handleInput(originValue)
+        } else {
+          calcFileBase64(filepath)
+        }
+      }">
+        是否有填充
+      </el-checkbox>
+      <el-radio-group v-show="activeType === 'file'" v-model="fileCalcFlag"
+                      @change="() => calcFileBase64(filepath)"
+                      fill="#29a745">
         <el-radio-button label="无" value="null"/>
         <el-radio-button label="DataUrl" value="data-url"/>
         <el-radio-button label="CSS" value="css"/>
@@ -209,19 +233,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-:deep(.el-radio-button) {
-  &.is-active {
-    .el-radio-button__inner:hover {
-      color: #fff !important;
-      background-color: #23923d !important;
-    }
-  }
-
-  .el-radio-button__inner:hover {
-    color: #29a745 !important;
-  }
-}
-
 :deep(.el-textarea) {
   height: 100%;
   --el-input-placeholder-color: #a8abb2;
@@ -305,7 +316,7 @@ onUnmounted(() => {
 
 .dropdown {
   :deep(.el-button) {
-    @apply bg-transparent font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
+    @apply font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
     --el-button-hover-border-color: #29a745;
     --el-button-hover-text-color: #29a745;
 

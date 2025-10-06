@@ -336,7 +336,7 @@ onUnmounted(() => {
 
 .dropdown {
   :deep(.el-button) {
-    @apply bg-transparent font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
+    @apply dark:bg-[#222] font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
     --el-button-hover-border-color: #29a745;
     --el-button-hover-text-color: #29a745;
 

@@ -57,7 +57,7 @@ onMounted(() => {
       </el-radio-group>
     </div>
     <div
-      class="flex-1 w-full border dark:border-[#4C4D4F] rounded-md overflow-auto"
+      class="flex-1 w-full border dark:border-[#4C4D4F] rounded-md"
     >
       <router-view />
     </div>
