@@ -1,6 +1,8 @@
+use base64::Engine;
 use hex::encode;
 use serde::Serialize;
 use sha1::Digest;
+use std::fs;
 use std::io::Read;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
@@ -35,6 +37,46 @@ fn sm3_hash(value: &str) -> String {
     let mut hasher = sm3::Sm3::new();
     hasher.update(value.as_bytes());
     encode(hasher.finalize())
+}
+
+fn base64_encode(value: Vec<u8>, safe: bool, pad: bool) -> String {
+    if safe {
+        if pad {
+            base64::engine::general_purpose::URL_SAFE.encode(value)
+        } else {
+            base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(value)
+        }
+    } else {
+        if pad {
+            base64::engine::general_purpose::STANDARD.encode(value)
+        } else {
+            base64::engine::general_purpose::STANDARD_NO_PAD.encode(value)
+        }
+    }
+}
+
+#[tauri::command]
+fn calculate_text_base64(value: &str, safe: bool, pad: bool) -> String {
+    base64_encode(value.as_bytes().to_vec(), safe, pad)
+}
+
+#[tauri::command]
+fn calculate_file_base64(path: &str, safe: bool, pad: bool, flag: &str) -> String {
+    let file_bytes = fs::read(path).unwrap();
+    let result = base64_encode(file_bytes, safe, pad);
+    let data_url = base64_to_data_url(result.as_str(), path);
+    match flag {
+        "null" => result,
+        "data-url" => data_url,
+        "css" => format!("background-image: url({})", data_url),
+        "html" => format!("<img src=\"{}\" />", data_url),
+        _ => result,
+    }
+}
+
+fn base64_to_data_url(value: &str, path: &str) -> String {
+    let mime_type = mime_guess::from_path(path).first_or_octet_stream();
+    format!("data:{};base64,{}", mime_type, value)
 }
 
 #[derive(Serialize)]
@@ -219,7 +261,9 @@ pub fn run() {
             get_window_always_on_top,
             set_window_always_on_top,
             check_update,
-            update_app
+            update_app,
+            calculate_text_base64,
+            calculate_file_base64
         ])
         .setup(|app| {
             // 读取配置文件，设置窗口主题

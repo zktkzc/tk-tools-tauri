@@ -6,12 +6,17 @@ const menuList = [
   {
     value: 0,
     label: '哈希计算',
-    path: '/home/hash/calc'
+    path: '/home/encrypt/calc'
   },
   {
     value: 1,
     label: '哈希比对',
-    path: '/home/hash/compare'
+    path: '/home/encrypt/compare'
+  },
+  {
+    value: 2,
+    label: 'Base64',
+    path: '/home/encrypt/base64'
   }
 ]
 

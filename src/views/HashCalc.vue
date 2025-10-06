@@ -9,7 +9,7 @@ import {open} from '@tauri-apps/plugin-dialog'
 import {eventBus} from "../utils/eventBus.ts"
 import {platform} from '@tauri-apps/plugin-os'
 
-const activeType = ref<string>('text')
+const activeType = ref<'text' | 'file'>('text')
 const originValue = ref<string>('')
 const md5Value = ref<string>('')
 const sha1Value = ref<string>('')
@@ -34,7 +34,7 @@ const clearResult = () => {
   sm3Value.value = ''
 }
 
-const handleCommand = (type: string): void => {
+const handleCommand = (type: 'text' | 'file'): void => {
   activeType.value = type
   clearResult()
 
@@ -74,7 +74,7 @@ const selectFile = async () => {
     title: '选择文件'
   }) as string
   try {
-        invoke("calculate_file_hash", {path: result})
+    invoke("calculate_file_hash", {path: result})
         .then((data: any) => {
           const {md5, sha1, sha256, sha512, sm3} = data as HashResult
           md5Value.value = md5
@@ -106,8 +106,14 @@ const initData = () => {
 }
 
 const clear = () => {
-  originValue.value = ''
-  handleInput('')
+  if (activeType.value === 'text') {
+    originValue.value = ''
+    handleInput('')
+  }
+
+  if (activeType.value === 'file') {
+    file.value = ''
+  }
 
   setData('hash_calc', {
     time: new Date().getTime(),

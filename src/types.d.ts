@@ -70,3 +70,14 @@ export type TextDiffDataType = {
         }
     }
 }
+
+export type Base64EncryptDataType = {
+    time: number
+    data: {
+        originValue: string
+        result: string
+        urlSafe: boolean
+        hasPad: boolean
+        fileCalcFlag: 'null' | 'data-url' | 'css' | 'html'
+    }
+}

@@ -8,7 +8,7 @@ const activeIndex = ref('0')
 const menuItems = [
   {index: '0', label: 'JSON工具', path: '/home/json'},
   {index: '1', label: '日期工具', path: '/home/date'},
-  {index: '2', label: '哈希工具', path: '/home/hash'},
+  {index: '2', label: '加解密', path: '/home/encrypt'},
   {index: '3', label: '生成工具', path: '/home/gen'},
   {index: '4', label: '文本比对', path: '/home/diff'}
 ]

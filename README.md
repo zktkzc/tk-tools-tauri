@@ -1,6 +1,6 @@
 # tk-tools
 
-使用Tauri2+Vue3编写的测试常用工具箱
+使用Tauri2+Vue3编写的常用工具合集软件。
 
 [Electron 版本](https://github.com/zktkzc/TK-Tools)(已不更新)
 
