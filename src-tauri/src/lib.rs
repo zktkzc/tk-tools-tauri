@@ -80,25 +80,44 @@ fn base64_to_data_url(value: &str, path: &str) -> String {
 }
 
 #[tauri::command]
-fn base64_decode(value: &str) -> Result<Vec<u8>, ()> {
-    let result = base64::engine::general_purpose::STANDARD.decode(value.as_bytes());
+fn base64_decode(value: &str, safe: bool, pad: bool) -> Result<Vec<u8>, String> {
+    let result;
+    if safe {
+        if pad {
+            result = base64::engine::general_purpose::URL_SAFE.decode(value.as_bytes());
+        } else {
+            result = base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(value.as_bytes());
+        }
+    } else {
+        if pad {
+            result = base64::engine::general_purpose::STANDARD.decode(value.as_bytes());
+        } else {
+            result = base64::engine::general_purpose::STANDARD_NO_PAD.decode(value.as_bytes());
+        }
+    }
+
     match result {
         Ok(data) => Ok(data),
-        Err(_) => Err(())
+        Err(err) => Err(err.to_string()),
     }
 }
 
 #[tauri::command]
-fn get_mime_type_from_base64_str(value: &str) -> String {
-    let bytes = base64_decode(value).unwrap();
-    if bytes.is_empty() {
-        return "".to_string();
-    }
+fn get_mime_type_from_base64_str(value: &str, safe: bool, pad: bool) -> String {
+    let result = base64_decode(value, safe, pad);
+    match result {
+        Ok(bytes) => {
+            if bytes.is_empty() {
+                return "".to_string();
+            }
 
-    if let Some(info) = infer::get(&bytes) {
-        info.mime_type().to_string()
-    } else {
-        "".to_string()
+            if let Some(info) = infer::get(&bytes) {
+                info.mime_type().to_string()
+            } else {
+                "".to_string()
+            }
+        },
+        Err(_) => "".to_string()
     }
 }
 

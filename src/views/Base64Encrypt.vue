@@ -136,7 +136,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-full grid grid-rows-[100px_auto_30px] gap-2">
+  <div class="w-full h-full grid grid-rows-[100px_30px_auto] gap-2">
     <div class="h-full relative">
       <div class="h-full" v-if="activeType === 'text'">
         <el-input
@@ -188,17 +188,7 @@ onUnmounted(() => {
         </el-dropdown>
       </div>
     </div>
-    <div>
-      <el-input
-          v-model="result"
-          type="textarea"
-          placeholder="输出..."
-          resize="none"
-          readonly
-          class="disable"
-      />
-    </div>
-    <div class="h-full flex items-center justify-center gap-2">
+    <div class="h-full flex items-center justify-start gap-2">
       <el-button @click="copy(result)">复制</el-button>
       <el-checkbox v-model="urlSafe" @change="() => {
         if (activeType === 'text') {
@@ -227,6 +217,16 @@ onUnmounted(() => {
         <el-radio-button label="CSS" value="css"/>
         <el-radio-button label="HTML" value="html"/>
       </el-radio-group>
+    </div>
+    <div>
+      <el-input
+          v-model="result"
+          type="textarea"
+          placeholder="输出..."
+          resize="none"
+          readonly
+          class="disable"
+      />
     </div>
   </div>
 </template>

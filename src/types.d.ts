@@ -87,5 +87,7 @@ export type Base64DecryptDataType = {
     data: {
         originValue: string
         result: string
+        urlSafe: boolean
+        hasPad: boolean
     }
 }

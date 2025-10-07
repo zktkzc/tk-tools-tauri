@@ -11,6 +11,8 @@ import dayjs from "dayjs";
 const {getData, setData} = useDataStore()
 const originValue = ref<string>('')
 const result = ref<string>('')
+const urlSafe = ref<boolean>(false)
+const hasPad = ref<boolean>(false)
 const resultType = ref<'text' | 'file' | 'image'>('text')
 const previewRef = ref<HTMLImageElement | null>(null)
 const showDownload = ref<boolean>(false)
@@ -30,17 +32,26 @@ const base64Decode = async () => {
   }
 
   if (resultType.value === 'text') {
-    invoke('base64_decode', {value: originValue.value}).then(data => {
+    invoke('base64_decode', {value: originValue.value, safe: urlSafe.value, pad: hasPad.value}).then(data => {
       if (data) {
         const uint8Array = new Uint8Array(data as any)
         const decoder = new TextDecoder('utf-8')
         result.value = decoder.decode(uint8Array)
       }
-    }).catch(e => console.error(e));
+    }).catch(e => {
+      ElMessage.error({
+        message: `转换失败: ${e}`,
+        grouping: true,
+        customClass: 'error'
+      })
+    });
     saveData()
   } else if (resultType.value === 'image' || resultType.value === 'file') {
-    invoke("get_mime_type_from_base64_str", {value: originValue.value}).then(data => {
-      console.log('mime_type', data)
+    invoke("get_mime_type_from_base64_str", {
+      value: originValue.value,
+      safe: urlSafe.value,
+      pad: hasPad.value
+    }).then(data => {
       mimeType = data as string
       if ((data as string) === '') mimeType = 'text/plain'
 
@@ -99,6 +110,8 @@ const initData = () => {
   const data = getData('base64_decrypt') as Base64DecryptDataType
   originValue.value = data.data?.originValue || ''
   result.value = data.data?.result || ''
+  urlSafe.value = data.data?.urlSafe || false
+  hasPad.value = data.data?.hasPad || false
 }
 
 const saveData = () => {
@@ -107,6 +120,8 @@ const saveData = () => {
     data: {
       originValue: originValue.value,
       result: result.value,
+      urlSafe: urlSafe.value,
+      hasPad: hasPad.value,
     }
   } as Base64DecryptDataType)
 }
@@ -143,10 +158,17 @@ onUnmounted(() => {
     </div>
     <div class="h-full flex items-center gap-2">
       <el-button @click="async () => await base64Decode()">转换</el-button>
+      <el-checkbox v-model="urlSafe" @change="saveData()">
+        Url安全
+      </el-checkbox>
+      <el-checkbox v-model="hasPad" @change="saveData()">
+        是否有填充
+      </el-checkbox>
       <el-button @click="copy(result)">复制</el-button>
       <div class="flex items-center">
         <div
             class="w-[60px] h-[32px] font-normal text-[15px] flex items-center justify-center rounded-tl-md rounded-bl-md border border-r-0 text-[#A1A3A9] dark:text-[#bdc6cd] dark:border-[#4C4D4F] bg-[#F5F7FA] dark:bg-[#333]"
+            style="user-select: none; cursor: default"
         >
           类型:
         </div>
@@ -175,7 +197,8 @@ onUnmounted(() => {
       />
       <div v-else-if="resultType === 'image' || resultType === 'file'"
            class="w-full h-full border rounded-md">
-        <div v-show="showDownload" class="w-full h-full flex md:flex-col items-center justify-center gap-2" style="user-select: none">
+        <div v-show="showDownload" class="w-full h-full flex md:flex-col items-center justify-center gap-2"
+             style="user-select: none; cursor: default">
           <img v-show="showPreview" ref="previewRef" src="" alt=""
                class="w-[30vmin] border border-dashed border-black"/>
           <div class="text-sm text-[#A8ABB2]">{{ filename }}</div>
@@ -252,6 +275,29 @@ onUnmounted(() => {
 
 .el-button + .el-button {
   margin-left: 0;
+}
+
+:deep(.el-checkbox) {
+  @apply border text-[#515A6E] dark:border-[#4C4D4F] dark:text-[#BBC6CE] hover:border-[#29A745] hover:text-[#29A745]
+  m-0 px-2 rounded-md cursor-pointer;
+
+  &:hover {
+    .el-checkbox__inner {
+      @apply border-[#29A745];
+    }
+  }
+}
+
+:deep(.el-checkbox__inner) {
+  @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  @apply bg-[#29A745] border border-[#29A745];
+}
+
+:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+  @apply text-[#29A745];
 }
 
 :deep(.el-select__wrapper) {
