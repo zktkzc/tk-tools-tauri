@@ -4,7 +4,7 @@ use serde::Serialize;
 use sha1::Digest;
 use std::fs;
 use std::io::Read;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_store::StoreExt;
 use tauri_plugin_updater::UpdaterExt;
@@ -116,8 +116,8 @@ fn get_mime_type_from_base64_str(value: &str, safe: bool, pad: bool) -> String {
             } else {
                 "".to_string()
             }
-        },
-        Err(_) => "".to_string()
+        }
+        Err(_) => "".to_string(),
     }
 }
 
@@ -197,18 +197,22 @@ fn get_theme(app: AppHandle) -> String {
 
 #[tauri::command]
 fn change_theme(app: AppHandle, value: &str) {
-    let window = app.get_webview_window("main").unwrap();
-    match value {
-        "light" => window.set_theme(Some(tauri::Theme::Light)).unwrap(),
-        "dark" => window.set_theme(Some(tauri::Theme::Dark)).unwrap(),
-        "system" => window.set_theme(None).unwrap(),
-        _ => panic!("Change theme error"),
-    }
+    app.windows().values().for_each(|window| {
+        match value {
+            "light" => window.set_theme(Some(tauri::Theme::Light)).unwrap(),
+            "dark" => window.set_theme(Some(tauri::Theme::Dark)).unwrap(),
+            "system" => window.set_theme(None).unwrap(),
+            _ => panic!("Change theme error"),
+        }
+        window.emit("theme-changed", &[] as &[()]).unwrap();
+    });
 }
 
 #[tauri::command]
 fn open_dev_tools(app: AppHandle) {
-    app.get_webview_window("main").unwrap().open_devtools()
+    app.get_webview_window(app.get_focused_window().unwrap().label())
+        .unwrap()
+        .open_devtools()
 }
 
 #[tauri::command]

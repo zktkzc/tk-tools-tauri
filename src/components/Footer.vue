@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {Browser, ClearFormat, Pin, SettingConfig} from '@icon-park/vue-next'
 import config from '../../package.json'
-import {useRoute, useRouter} from 'vue-router'
 import {computedAsync} from '@vueuse/core'
 import {onMounted, onUnmounted} from 'vue'
 import {invoke} from "@tauri-apps/api/core";
-import {getCurrentWindow} from '@tauri-apps/api/window'
+import {listen} from '@tauri-apps/api/event'
+import {WebviewWindow, getCurrentWebviewWindow, getAllWebviewWindows} from '@tauri-apps/api/webviewWindow'
 import {eventBus} from "../utils/eventBus.ts";
+import {useRoute} from "vue-router";
 
-const router = useRouter()
 const route = useRoute()
 const onTop = computedAsync(async () => {
   return await invoke('get_window_always_on_top')
@@ -21,7 +21,7 @@ const openDevTools = async () => {
   await invoke('open_dev_tools')
 }
 
-const unlisten = await getCurrentWindow().onThemeChanged(({payload: theme}) => {
+const unlisten = await getCurrentWebviewWindow().onThemeChanged(({payload: theme}) => {
   themeMode.value = theme
 })
 
@@ -34,22 +34,33 @@ const top = async () => {
   eventBus.emit('change_on_top')
 }
 
-const onThemeChanged = async () => {
+listen('theme-changed', async () => {
   themeMode.value = await invoke('get_theme')
-}
+})
 
 const onTopChanged = async () => {
   onTop.value = await invoke('get_window_always_on_top')
 }
 
+const openConfigWindow = async () => {
+  const windows = await getAllWebviewWindows()
+  const window = windows.find(window => window.label === 'config')
+
+  window!.onCloseRequested((event) => {
+    event.preventDefault()
+    window!.hide()
+  }).catch(error => console.log(error))
+
+  await window!.center()
+  await window!.show()
+}
+
 onMounted(() => {
-  eventBus.on('change_theme', onThemeChanged)
   eventBus.on('change_on_top', onTopChanged)
 })
 
 onUnmounted(() => {
   unlisten()
-  eventBus.off('change_theme', onThemeChanged)
   eventBus.off('change_on_top', onTopChanged)
 })
 </script>
@@ -61,7 +72,7 @@ onUnmounted(() => {
   >
     tkzc00作品&nbsp;v{{ config.version }}
     <div class="h-full absolute top-0 right-2 flex items-center justify-center gap-2 mx-2">
-      <el-tooltip content="清空输入" :effect="themeMode">
+      <el-tooltip v-if="!route.path.includes('config')" content="清空输入" :effect="themeMode">
         <clear-format
             theme="outline"
             size="24"
@@ -96,13 +107,13 @@ onUnmounted(() => {
             @click="openDevTools"
         />
       </el-tooltip>
-      <el-tooltip content="设置" :effect="themeMode">
+      <el-tooltip v-if="!route.path.includes('config')" content="设置" :effect="themeMode">
         <setting-config
             theme="filled"
             size="24"
             :stroke-width="4"
             class="text-[#515A6E] dark:text-[#BDC6CD] hover:text-[#29a745] cursor-pointer flex items-center"
-            @click="router.push({ path: '/config', query: { from: route.path } })"
+            @click="openConfigWindow"
         />
       </el-tooltip>
     </div>

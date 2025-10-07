@@ -18,6 +18,28 @@
         "height": 700,
         "minWidth": 700,
         "minHeight": 500
+      },
+      {
+        "label": "update",
+        "title": "软件更新",
+        "width": 700,
+        "height": 500,
+        "minWidth": 700,
+        "minHeight": 500,
+        "center": true,
+        "visible": false,
+        "url": "#/update"
+      },
+      {
+        "label": "config",
+        "title": "软件设置",
+        "width": 700,
+        "height": 500,
+        "minWidth": 700,
+        "minHeight": 500,
+        "center": true,
+        "visible": false,
+        "url": "#/config"
       }
     ],
     "security": {

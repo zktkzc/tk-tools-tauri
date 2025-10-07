@@ -8,6 +8,7 @@ import {computedAsync} from '@vueuse/core'
 import {basicSetup} from 'codemirror'
 import {EditorState} from '@codemirror/state'
 import {invoke} from "@tauri-apps/api/core";
+import { listen } from '@tauri-apps/api/event';
 import {getCurrentWindow} from "@tauri-apps/api/window";
 
 const props = defineProps({
@@ -111,6 +112,10 @@ onMounted(async () => {
 onUnmounted(() => {
   editorView.value?.destroy()
   unlisten()
+})
+
+listen('theme-changed', async () => {
+  themeMode.value = await invoke('get_theme')
 })
 
 watch(
