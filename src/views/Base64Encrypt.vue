@@ -140,7 +140,6 @@ onUnmounted(() => {
     <div class="h-full relative">
       <div class="h-full" v-if="activeType === 'text'">
         <el-input
-            v-if="activeType === 'text'"
             v-model="originValue"
             type="textarea"
             placeholder="输入..."

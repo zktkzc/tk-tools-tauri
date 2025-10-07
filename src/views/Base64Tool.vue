@@ -58,12 +58,10 @@ onMounted(() => {
     }
 
     &:hover {
-      @media (prefers-color-scheme: light) {
-        color: #29A745;
-      }
+      color: #29A745 !important;
 
       @media (prefers-color-scheme: dark) {
-        background-color: rgba(35, 146, 61, 0.38) !important;
+        background-color: rgba(15, 173, 142, 0.12) !important;
       }
     }
   }

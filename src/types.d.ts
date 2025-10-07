@@ -81,3 +81,11 @@ export type Base64EncryptDataType = {
         fileCalcFlag: 'null' | 'data-url' | 'css' | 'html'
     }
 }
+
+export type Base64DecryptDataType = {
+    time: number
+    data: {
+        originValue: string
+        result: string
+    }
+}

@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {
+    Base64DecryptDataType,
     Base64EncryptDataType,
     GenerateCharacterDataType,
     GenerateUUIDDataType,
@@ -17,7 +18,8 @@ export const useDataStore = defineStore('data', {
                 gen_ch: {} as GenerateCharacterDataType,
                 gen_uuid: {} as GenerateUUIDDataType,
                 text_diff: {} as TextDiffDataType,
-                base64_encrypt: {} as Base64EncryptDataType
+                base64_encrypt: {} as Base64EncryptDataType,
+                base64_decrypt: {} as Base64DecryptDataType
             }
         }
     },

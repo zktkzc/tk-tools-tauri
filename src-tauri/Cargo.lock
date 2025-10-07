@@ -4465,6 +4465,7 @@ version = "1.3.0"
 dependencies = [
  "base64 0.22.1",
  "hex",
+ "infer",
  "md-5",
  "mime_guess",
  "serde",

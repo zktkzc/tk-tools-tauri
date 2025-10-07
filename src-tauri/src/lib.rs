@@ -79,6 +79,29 @@ fn base64_to_data_url(value: &str, path: &str) -> String {
     format!("data:{};base64,{}", mime_type, value)
 }
 
+#[tauri::command]
+fn base64_decode(value: &str) -> Result<Vec<u8>, ()> {
+    let result = base64::engine::general_purpose::STANDARD.decode(value.as_bytes());
+    match result {
+        Ok(data) => Ok(data),
+        Err(_) => Err(())
+    }
+}
+
+#[tauri::command]
+fn get_mime_type_from_base64_str(value: &str) -> String {
+    let bytes = base64_decode(value).unwrap();
+    if bytes.is_empty() {
+        return "".to_string();
+    }
+
+    if let Some(info) = infer::get(&bytes) {
+        info.mime_type().to_string()
+    } else {
+        "".to_string()
+    }
+}
+
 #[derive(Serialize)]
 pub struct HashResult {
     pub md5: String,
@@ -263,7 +286,9 @@ pub fn run() {
             check_update,
             update_app,
             calculate_text_base64,
-            calculate_file_base64
+            calculate_file_base64,
+            base64_decode,
+            get_mime_type_from_base64_str
         ])
         .setup(|app| {
             // 读取配置文件，设置窗口主题
