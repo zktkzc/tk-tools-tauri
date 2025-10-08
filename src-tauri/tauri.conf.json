@@ -51,7 +51,7 @@
     "createUpdaterArtifacts": true,
     "shortDescription": "TK工具箱",
     "longDescription": "TK常用工具集合",
-    "targets": ["deb", "rpm", "appimage", "nsis", "app", "dmg"],
+    "targets": ["nsis", "app", "dmg"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
