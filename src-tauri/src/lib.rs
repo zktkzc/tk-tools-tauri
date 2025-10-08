@@ -4,10 +4,10 @@ use serde::Serialize;
 use sha1::Digest;
 use std::fs;
 use std::io::Read;
-use tauri::{AppHandle, Emitter, Manager, WindowEvent};
+use tauri::{AppHandle, Emitter, Listener, Manager, WindowEvent};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_store::StoreExt;
-use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_updater::{Update, UpdaterExt};
 
 fn md5_hash(value: &str) -> String {
     let mut hasher = md5::Md5::new();
@@ -210,9 +210,7 @@ fn change_theme(app: AppHandle, value: &str) {
 
 #[tauri::command]
 fn open_dev_tools(app: AppHandle, label: &str) {
-    app.get_webview_window(label)
-        .unwrap()
-        .open_devtools()
+    app.get_webview_window(label).unwrap().open_devtools()
 }
 
 #[tauri::command]
@@ -231,61 +229,116 @@ fn set_window_always_on_top(app: AppHandle, value: bool, label: &str) {
         .unwrap()
 }
 
-#[tauri::command]
-async fn check_update(app: AppHandle) {
-    update_app(app)
+#[derive(Serialize)]
+struct CheckUpdateResult {
+    status: bool,
+    version: String,
+    body: String,
 }
 
 #[tauri::command]
-fn update_app(app: AppHandle) {
-    let handle = app.clone();
-    tauri::async_runtime::spawn(async move {
-        update(handle).await.unwrap();
+async fn check_update(app: AppHandle) -> CheckUpdateResult {
+    if let Some(update) = app.updater().unwrap().check().await.unwrap() {
+        update_app(app, update.clone());
+        return CheckUpdateResult {
+            status: true,
+            version: update.version,
+            body: update.body.unwrap(),
+        };
+    }
+
+    CheckUpdateResult {
+        status: false,
+        version: "".to_string(),
+        body: "".to_string(),
+    }
+}
+
+fn update_app(app: AppHandle, update_info: Update) {
+    let app_handle = app.clone();
+    let update_window = app.get_webview_window("update").unwrap();
+    update_window.show().unwrap();
+    update_window
+        .emit(
+            "show-update-window",
+            &[CheckUpdateResult {
+                status: true,
+                version: update_info.clone().version,
+                body: update_info.clone().body.unwrap(),
+            }],
+        )
+        .unwrap();
+    update_window.on_window_event(move |event| {
+        if let WindowEvent::CloseRequested { api, .. } = event {
+            api.prevent_close();
+
+            let app = app_handle.clone();
+            let update_window = app.get_webview_window("update").unwrap();
+            update_window.hide().unwrap();
+        }
+    });
+
+    let app_handle = app.clone();
+    update_window.listen("download-update", move |_| {
+        let handle = app_handle.clone();
+        let update_info = update_info.clone();
+        tauri::async_runtime::spawn(async move {
+            update(handle, update_info).await.unwrap();
+        });
+    });
+
+    let app_handle = app.clone();
+    update_window.listen("cancel-update", move |_| {
+        let app = app_handle.clone();
+        let update_window = app.get_webview_window("update").unwrap();
+        update_window.hide().unwrap();
     });
 }
 
-async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
-    if let Some(update) = app.updater()?.check().await? {
-        let ans = app
-            .dialog()
-            .message(format!("发现新版本v{}，是否要更新？", update.version))
-            .title("软件更新")
-            .kind(MessageDialogKind::Info)
-            .buttons(MessageDialogButtons::OkCancelCustom(
-                "确定".to_string(),
-                "取消".to_string(),
-            ))
-            .blocking_show();
-        if !ans {
-            return Ok(());
-        }
+#[derive(Serialize)]
+struct DownloadPercentage {
+    downloaded: usize,
+    total: u64,
+}
 
-        let mut downloaded = 0;
+async fn update(app: AppHandle, update: Update) -> tauri_plugin_updater::Result<()> {
+    let update_window = app.get_webview_window("update").unwrap();
+    let mut downloaded = 0;
 
-        // alternatively we could also call update.download() and update.install() separately
-        update
-            .download_and_install(
-                |chunk_length, content_length| {
-                    downloaded += chunk_length;
-                    println!("下载中: {downloaded}/{content_length:?}");
-                },
-                || {
-                    println!("下载完成");
-                },
-            )
-            .await?;
+    update
+        .download_and_install(
+            |chunk_length, content_length| {
+                downloaded += chunk_length;
+                println!("下载中: {downloaded}/{content_length:?}");
+                update_window
+                    .emit(
+                        "downloading-update",
+                        &[DownloadPercentage {
+                            downloaded,
+                            total: content_length.unwrap(),
+                        }],
+                    )
+                    .unwrap();
+            },
+            || {
+                println!("下载完成");
+                update_window
+                    .emit("download-update-complete", &[] as &[()])
+                    .unwrap();
 
-        let ans = app
-            .dialog()
-            .message("下载完成，点击重启软件")
-            .kind(MessageDialogKind::Info)
-            .title("软件更新")
-            .buttons(MessageDialogButtons::OkCustom("确定".to_string()))
-            .blocking_show();
-        if ans {
-            app.restart();
-        }
-    }
+                let ans = app
+                    .dialog()
+                    .message("下载完成，点击重启软件")
+                    .kind(MessageDialogKind::Info)
+                    .title("软件更新")
+                    .buttons(MessageDialogButtons::OkCustom("确定".to_string()))
+                    .blocking_show();
+                if ans {
+                    app.restart();
+                }
+            },
+        )
+        .await?;
 
     Ok(())
 }
@@ -293,6 +346,7 @@ async fn update(app: AppHandle) -> tauri_plugin_updater::Result<()> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
@@ -307,7 +361,6 @@ pub fn run() {
             get_window_always_on_top,
             set_window_always_on_top,
             check_update,
-            update_app,
             calculate_text_base64,
             calculate_file_base64,
             base64_decode,
@@ -343,7 +396,10 @@ pub fn run() {
                         // 软件启动时检测更新
                         if let Some(auto_update) = settings["autoUpdate"].as_bool() {
                             if auto_update {
-                                update_app(app.handle().clone());
+                                let handle = app.handle().clone();
+                                tauri::async_runtime::spawn(async move {
+                                    check_update(handle).await;
+                                });
                             }
                         }
 

@@ -48,9 +48,9 @@ onUnmounted(() => {
           <div class="config-content border-none">
             <span>主题模式</span>
             <el-select v-model="settings!.theme" popper-class="custom-select" class="w-[200px]" @change="changeTheme">
-              <el-option label="跟随系统" value="light"/>
+              <el-option label="浅色模式" value="light"/>
               <el-option label="深色模式" value="dark"/>
-              <el-option label="浅色模式" value="system"/>
+              <el-option label="跟随系统" value="system"/>
             </el-select>
           </div>
         </div>

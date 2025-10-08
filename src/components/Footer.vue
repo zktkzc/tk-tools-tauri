@@ -7,9 +7,7 @@ import {invoke} from "@tauri-apps/api/core";
 import {listen} from '@tauri-apps/api/event'
 import {getAllWebviewWindows, getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow'
 import {eventBus} from "../utils/eventBus.ts";
-import {useRoute} from "vue-router";
 
-const route = useRoute()
 const onTop = ref<boolean>(false)
 const themeMode = computedAsync(async () => {
   return await invoke('get_theme')
@@ -75,7 +73,7 @@ onUnmounted(() => {
   >
     tkzc00作品&nbsp;v{{ config.version }}
     <div class="h-full absolute top-0 right-2 flex items-center justify-center gap-2 mx-2">
-      <el-tooltip v-if="!route.path.includes('config')" content="清空输入" :effect="themeMode">
+      <el-tooltip content="清空输入" :effect="themeMode">
         <clear-format
             theme="outline"
             size="24"
@@ -110,7 +108,7 @@ onUnmounted(() => {
             @click="openDevTools"
         />
       </el-tooltip>
-      <el-tooltip v-if="!route.path.includes('config')" content="设置" :effect="themeMode">
+      <el-tooltip content="设置" :effect="themeMode">
         <setting-config
             theme="filled"
             size="24"

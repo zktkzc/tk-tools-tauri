@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    @apply font-light;
+  }
+
   ::-webkit-scrollbar {
     @apply w-2;
   }

@@ -91,3 +91,8 @@ export type Base64DecryptDataType = {
         hasPad: boolean
     }
 }
+
+export type UpdateInfoType = {
+    version: string
+    body: string
+}

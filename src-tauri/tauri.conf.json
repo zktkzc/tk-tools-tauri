@@ -22,10 +22,10 @@
       {
         "label": "update",
         "title": "软件更新",
-        "width": 700,
-        "height": 500,
-        "minWidth": 700,
-        "minHeight": 500,
+        "width": 500,
+        "height": 400,
+        "minWidth": 500,
+        "minHeight": 400,
         "center": true,
         "visible": false,
         "url": "#/update"

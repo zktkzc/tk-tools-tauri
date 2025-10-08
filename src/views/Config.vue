@@ -4,7 +4,6 @@ import {onMounted, onUnmounted, ref} from 'vue'
 import {useSettingsStore} from '../store/useSettingsStore'
 import {computedAsync} from '@vueuse/core'
 import {invoke} from "@tauri-apps/api/core"
-import {eventBus} from "../utils/eventBus.ts"
 import {get, set} from "../store/AppConfigStore.ts"
 import {getCurrentWebviewWindow} from "@tauri-apps/api/webviewWindow";
 import {Info, Platte, SettingConfig} from '@icon-park/vue-next'
@@ -39,7 +38,6 @@ const initSettings = async () => {
 
     if (oldSettings.theme) {
       await invoke('change_theme', {value: oldSettings.theme})
-      eventBus.emit('change_theme')
     }
   }
   if (!oldSettings.theme) oldSettings.theme = 'system'
@@ -83,7 +81,7 @@ onUnmounted(() => {
               <el-menu-item index="1">
                 <template #title>
                   <div class="content">
-                    <span><setting-config size="20" /></span>
+                    <span><setting-config size="20"/></span>
                     系统
                   </div>
                 </template>
@@ -108,7 +106,7 @@ onUnmounted(() => {
           </el-scrollbar>
         </el-aside>
         <el-main class="p-0 bg-[#f3f3f3] dark:bg-[#111]">
-          <router-view />
+          <router-view/>
         </el-main>
       </el-container>
     </div>
@@ -154,27 +152,26 @@ onUnmounted(() => {
 
   .config-body {
     .config-title {
-      @apply text-[22px] mb-3;
+      @apply text-[22px] mb-3 text-black dark:text-white;
     }
 
     .config-item {
       @apply rounded-md overflow-hidden;
 
       .config-wrapper {
-        @apply px-2 bg-[#fff];
+        @apply px-2 bg-[#fff] dark:bg-[#262626];
 
         .config-content {
           @apply grid grid-cols-[auto_auto] py-3 border-b;
 
-          span {
-            @apply text-[15px] flex items-center;
+          > span {
+            @apply text-[15px] flex items-center text-black dark:text-white;
           }
         }
       }
     }
   }
 }
-
 
 :deep(.el-select) {
   &:hover {
@@ -184,27 +181,27 @@ onUnmounted(() => {
   }
 
   .el-select__wrapper {
-    @apply dark:bg-[#252525] shadow-none hover:shadow-none border border-[#DCDFE6]
+    @apply dark:bg-[#373737] shadow-none hover:shadow-none border border-[#DCDFE6]
     dark:border-[#4C4D4F] hover:border-[#29a745];
   }
 
   .el-select__placeholder {
-    @apply text-[15px] text-black dark:text-[#bbc6ce] hover:text-[#29a745];
+    @apply text-[15px] text-black dark:text-[#fff] hover:text-[#29a745];
   }
 }
 
 :deep(.el-checkbox) {
-  @apply text-[#515A6E] dark:text-[#BBC6CE] hover:text-[#29A745] cursor-pointer;
+  @apply text-black dark:text-white font-light hover:text-[#29A745] cursor-pointer;
 
   &:hover {
     .el-checkbox__inner {
       @apply border-[#29A745];
     }
   }
-}
 
-:deep(.el-checkbox__inner) {
-  @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
+  .el-checkbox__inner {
+    @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
+  }
 }
 
 :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
@@ -216,6 +213,8 @@ onUnmounted(() => {
 }
 
 :deep(.el-button) {
+  @apply font-light;
+
   --el-button-bg-color: #29A745;
   --el-button-text-color: #fff;
   --el-button-border-color: #29A745;
@@ -224,16 +223,9 @@ onUnmounted(() => {
   --el-button-hover-text-color: #fff;
   --el-button-active-bg-color: #23923d;
   --el-button-active-border-color: #23923d;
+}
 
-  @media (prefers-color-scheme: dark) {
-    --el-button-bg-color: #252525;
-    --el-button-border-color: #4c4d4f;
-    --el-button-text-color: #bbc6ce;
-    --el-button-hover-bg-color: #252525;
-    --el-button-hover-border-color: #23923d;
-    --el-button-hover-text-color: #23923d;
-    --el-button-active-bg-color: #252525;
-    --el-button-active-border-color: #23923d;
-  }
+:deep(.el-button+.el-button) {
+  margin-left: 0;
 }
 </style>

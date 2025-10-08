@@ -114,6 +114,11 @@ const router = createRouter({
                             component: () => import('../views/config/About.vue')
                         }
                     ]
+                },
+                {
+                    path: 'update',
+                    name: 'update',
+                    component: () => import('../views/Update.vue')
                 }
             ]
         }

@@ -14,4 +14,7 @@ import Menu from "../components/Menu.vue";
 </template>
 
 <style lang="scss" scoped>
+:deep(.el-radio), :deep(.el-button), :deep(.el-checkbox) {
+  @apply font-light;
+}
 </style>

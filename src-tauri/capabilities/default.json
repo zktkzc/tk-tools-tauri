@@ -18,6 +18,7 @@
     "dialog:allow-open",
     "store:default",
     "store:allow-load",
-    "updater:default"
+    "updater:default",
+    "shell:default"
   ]
 }
