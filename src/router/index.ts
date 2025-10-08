@@ -96,7 +96,24 @@ const router = createRouter({
                 {
                     path: 'config',
                     name: 'config',
-                    component: () => import('../views/Config.vue')
+                    component: () => import('../views/Config.vue'),
+                    children: [
+                        {
+                            path: 'system',
+                            name: 'system',
+                            component: () => import('../views/config/System.vue')
+                        },
+                        {
+                            path: 'appearance',
+                            name: 'appearance',
+                            component: () => import('../views/config/Appearance.vue')
+                        },
+                        {
+                            path: 'about',
+                            name: 'about',
+                            component: () => import('../views/config/About.vue')
+                        }
+                    ]
                 }
             ]
         }

@@ -4,7 +4,7 @@ use serde::Serialize;
 use sha1::Digest;
 use std::fs;
 use std::io::Read;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, WindowEvent};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_store::StoreExt;
 use tauri_plugin_updater::UpdaterExt;
@@ -209,23 +209,23 @@ fn change_theme(app: AppHandle, value: &str) {
 }
 
 #[tauri::command]
-fn open_dev_tools(app: AppHandle) {
-    app.get_webview_window(app.get_focused_window().unwrap().label())
+fn open_dev_tools(app: AppHandle, label: &str) {
+    app.get_webview_window(label)
         .unwrap()
         .open_devtools()
 }
 
 #[tauri::command]
-fn get_window_always_on_top(app: AppHandle) -> bool {
-    app.get_webview_window("main")
+fn get_window_always_on_top(app: AppHandle, label: &str) -> bool {
+    app.get_webview_window(label)
         .unwrap()
         .is_always_on_top()
         .unwrap()
 }
 
 #[tauri::command]
-fn set_window_always_on_top(app: AppHandle, value: bool) {
-    app.get_webview_window("main")
+fn set_window_always_on_top(app: AppHandle, value: bool, label: &str) {
+    app.get_webview_window(label)
         .unwrap()
         .set_always_on_top(value)
         .unwrap()
@@ -314,6 +314,18 @@ pub fn run() {
             get_mime_type_from_base64_str
         ])
         .setup(|app| {
+            // 注册主窗体的关闭事件
+            let main_window = app.get_webview_window("main").expect("获取main窗体失败");
+            let app_handle = app.handle().clone();
+            main_window.on_window_event(move |event| {
+                if let WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+
+                    let app = app_handle.clone();
+                    app.exit(0);
+                }
+            });
+
             // 读取配置文件，设置窗口主题
             let store = match app.store("config.json") {
                 Ok(s) => Some(s),
@@ -324,13 +336,18 @@ pub fn run() {
                 let store = store.unwrap();
                 match store.get("settings") {
                     Some(settings) => {
-                        change_theme(app.handle().clone(), settings["theme"].as_str().unwrap());
-                        store.close_resource();
+                        if let Some(theme) = settings["theme"].as_str() {
+                            change_theme(app.handle().clone(), theme)
+                        }
 
                         // 软件启动时检测更新
-                        if settings["autoUpdate"].as_bool().unwrap() {
-                            update_app(app.handle().clone());
+                        if let Some(auto_update) = settings["autoUpdate"].as_bool() {
+                            if auto_update {
+                                update_app(app.handle().clone());
+                            }
                         }
+
+                        store.close_resource();
                     }
                     None => {}
                 }

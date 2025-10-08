@@ -2,23 +2,21 @@
 import {Browser, ClearFormat, Pin, SettingConfig} from '@icon-park/vue-next'
 import config from '../../package.json'
 import {computedAsync} from '@vueuse/core'
-import {onMounted, onUnmounted} from 'vue'
+import {nextTick, onMounted, onUnmounted, ref} from 'vue'
 import {invoke} from "@tauri-apps/api/core";
 import {listen} from '@tauri-apps/api/event'
-import {WebviewWindow, getCurrentWebviewWindow, getAllWebviewWindows} from '@tauri-apps/api/webviewWindow'
+import {getAllWebviewWindows, getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow'
 import {eventBus} from "../utils/eventBus.ts";
 import {useRoute} from "vue-router";
 
 const route = useRoute()
-const onTop = computedAsync(async () => {
-  return await invoke('get_window_always_on_top')
-})
+const onTop = ref<boolean>(false)
 const themeMode = computedAsync(async () => {
   return await invoke('get_theme')
 })
 
 const openDevTools = async () => {
-  await invoke('open_dev_tools')
+  await invoke('open_dev_tools', {label: getCurrentWebviewWindow().label})
 }
 
 const unlisten = await getCurrentWebviewWindow().onThemeChanged(({payload: theme}) => {
@@ -30,7 +28,7 @@ const handleClear = () => {
 }
 
 const top = async () => {
-  await invoke('set_window_always_on_top', {value: !onTop.value})
+  await invoke('set_window_always_on_top', {value: !onTop.value, label: getCurrentWebviewWindow().label})
   eventBus.emit('change_on_top')
 }
 
@@ -39,24 +37,29 @@ listen('theme-changed', async () => {
 })
 
 const onTopChanged = async () => {
-  onTop.value = await invoke('get_window_always_on_top')
+  onTop.value = await invoke('get_window_always_on_top', {label: getCurrentWebviewWindow().label})
 }
 
 const openConfigWindow = async () => {
   const windows = await getAllWebviewWindows()
-  const window = windows.find(window => window.label === 'config')
+  const window = windows.find(window => window.label === 'config')!
 
   window!.onCloseRequested((event) => {
     event.preventDefault()
-    window!.hide()
+    window.hide()
   }).catch(error => console.log(error))
 
-  await window!.center()
-  await window!.show()
+  const visible = await window.isVisible()
+  if (!visible) {
+    await window.center()
+  }
+  await window.show()
 }
 
-onMounted(() => {
+onMounted(async () => {
   eventBus.on('change_on_top', onTopChanged)
+  await nextTick()
+  onTop.value = await invoke('get_window_always_on_top', {label: getCurrentWebviewWindow().label})
 })
 
 onUnmounted(() => {
