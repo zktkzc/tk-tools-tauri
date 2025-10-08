@@ -23,6 +23,7 @@ const bodyArray = computed(() => {
 })
 
 listen('show-update-window', ({payload}) => {
+  init()
   const {version, body} = (payload as any)[0]
   update.value.version = version
   update.value.body = body
@@ -57,11 +58,15 @@ listen('download-update-complete', () => {
   downloadedSize.value = totalSize.value
 })
 
-onMounted(() => {
+const init = () => {
   settings.value = getSettings()
   showProgressBar.value = false
   downloadedSize.value = 0
   totalSize.value = 0
+}
+
+onMounted(() => {
+  init()
 })
 </script>
 
@@ -91,7 +96,7 @@ onMounted(() => {
       <div class="">
         <el-checkbox label="启动时自动更新" v-model="settings.autoUpdate" @change="changeAutoUpdate"/>
       </div>
-      <div class="w-full flex items-center justify-between">
+      <div class="w-full flex items-center justify-between mt-2">
         <div class="w-full mr-4">
           <el-progress v-show="showProgressBar" :stroke-width="22" status="success" text-inside striped striped-flow
                        :percentage="(downloadedSize / totalSize * 100).toFixed(0)"/>
