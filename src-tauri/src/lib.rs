@@ -325,21 +325,21 @@ async fn update(app: AppHandle, update: Update) -> tauri_plugin_updater::Result<
                 update_window
                     .emit("download-update-complete", &[] as &[()])
                     .unwrap();
-
-                let ans = app
-                    .dialog()
-                    .message("下载完成，点击重启软件")
-                    .kind(MessageDialogKind::Info)
-                    .title("软件更新")
-                    .buttons(MessageDialogButtons::OkCustom("确定".to_string()))
-                    .blocking_show();
-
-                if ans {
-                    app.restart();
-                }
             },
         )
         .await?;
+
+    let ans = app
+        .dialog()
+        .message("下载完成，点击重启软件")
+        .kind(MessageDialogKind::Info)
+        .title("软件更新")
+        .buttons(MessageDialogButtons::OkCustom("确定".to_string()))
+        .blocking_show();
+
+    if ans {
+        app.restart();
+    }
 
     Ok(())
 }
