@@ -5,7 +5,7 @@ import {computedAsync} from '@vueuse/core'
 import {nextTick, onMounted, onUnmounted, ref} from 'vue'
 import {invoke} from "@tauri-apps/api/core";
 import {listen} from '@tauri-apps/api/event'
-import {getAllWebviewWindows, getCurrentWebviewWindow} from '@tauri-apps/api/webviewWindow'
+import {getAllWebviewWindows, getCurrentWebviewWindow, WebviewWindow} from '@tauri-apps/api/webviewWindow'
 import {eventBus} from "../utils/eventBus.ts";
 
 const onTop = ref<boolean>(false)
@@ -39,19 +39,26 @@ const onTopChanged = async () => {
 }
 
 const openConfigWindow = async () => {
+  let window = undefined
   const windows = await getAllWebviewWindows()
-  const window = windows.find(window => window.label === 'config')!
+  window = windows.find(window => window.label === 'config')
+  if (!window) {
+    window = new WebviewWindow('config', {
+      title: "软件设置",
+      width: 700,
+      height: 500,
+      minWidth: 700,
+      minHeight: 500,
+      center: true,
+      url: "#/config"
+    })
 
-  window!.onCloseRequested((event) => {
-    event.preventDefault()
-    window.hide()
-  }).catch(error => console.log(error))
-
-  const visible = await window.isVisible()
-  if (!visible) {
-    await window.center()
+    await window.once('tauri://error', (e) => {
+      console.error(e)
+    })
+  } else {
+    await window.show()
   }
-  await window.show()
 }
 
 onMounted(async () => {

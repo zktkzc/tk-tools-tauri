@@ -10,9 +10,9 @@
   "permissions": [
     "core:default",
     "core:window:allow-show",
-    "core:window:allow-hide",
     "core:window:allow-center",
     "core:window:allow-close",
+    "core:webview:allow-create-webview-window",
     "opener:default",
     "dialog:default",
     "dialog:allow-open",

@@ -139,7 +139,7 @@ onUnmounted(() => {
 
 <template>
   <div
-      class="w-full h-full p-2 grid grid-rows-5 grid-cols-2 gap-2 dark:bg-[#252525]"
+      class="w-full h-full p-2 grid grid-rows-5 grid-cols-2 gap-2 dark:bg-[#252525] rounded-md"
   >
     <div class="h-full col-1 row-span-full relative">
       <div v-if="activeType === 'text'" class="h-full">
@@ -202,9 +202,8 @@ onUnmounted(() => {
           class="h-full disable"
       />
       <el-button
-          type="primary"
           size="small"
-          class="absolute bottom-1 right-1"
+          class="button-with-bg absolute bottom-1 right-1"
           @click="copy(md5Value)"
       >
         md5
@@ -220,9 +219,8 @@ onUnmounted(() => {
           class="h-full disable"
       />
       <el-button
-          type="primary"
           size="small"
-          class="absolute bottom-1 right-1"
+          class="button-with-bg absolute bottom-1 right-1"
           @click="copy(sha1Value)"
       >
         sha1
@@ -238,9 +236,8 @@ onUnmounted(() => {
           class="h-full disable"
       />
       <el-button
-          type="primary"
           size="small"
-          class="absolute bottom-1 right-1"
+          class="button-with-bg absolute bottom-1 right-1"
           @click="copy(sha256Value)"
       >
         sha256
@@ -256,9 +253,8 @@ onUnmounted(() => {
           class="h-full disable"
       />
       <el-button
-          type="primary"
           size="small"
-          class="absolute bottom-1 right-1"
+          class="button-with-bg absolute bottom-1 right-1"
           @click="copy(sha512Value)"
       >
         sha512
@@ -274,9 +270,8 @@ onUnmounted(() => {
           class="h-full disable"
       />
       <el-button
-          type="primary"
           size="small"
-          class="absolute bottom-1 right-1"
+          class="button-with-bg absolute bottom-1 right-1"
           @click="copy(sm3Value)"
       >
         sm3
@@ -323,40 +318,5 @@ onUnmounted(() => {
 
 :deep(.el-button) {
   @apply text-xs font-normal;
-}
-
-:deep(.el-button--primary) {
-  --el-button-bg-color: #29a745;
-  --el-button-border-color: #29a745;
-  --el-button-hover-bg-color: #23923d;
-  --el-button-hover-border-color: #23923d;
-  --el-button-active-bg-color: #23923d;
-  --el-button-active-border-color: #23923d;
-}
-
-.dropdown {
-  :deep(.el-button) {
-    @apply dark:bg-[#222] font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
-    --el-button-hover-border-color: #29a745;
-    --el-button-hover-text-color: #29a745;
-
-    &:hover {
-      border-color: #29a745 !important;
-      color: #29a745 !important;
-    }
-  }
-}
-
-:deep(.el-button) {
-  &.upload-btn {
-    --el-button-text-color: #fff;
-    --el-button-bg-color: #29a745;
-    --el-button-border-color: #29a745;
-    --el-button-hover-text-color: #fff;
-    --el-button-hover-bg-color: #23923d;
-    --el-button-hover-border-color: #23923d;
-    --el-button-active-bg-color: #23923d;
-    --el-button-active-border-color: #23923d;
-  }
 }
 </style>

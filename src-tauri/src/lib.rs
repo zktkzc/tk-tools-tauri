@@ -4,7 +4,8 @@ use serde::Serialize;
 use sha1::Digest;
 use std::fs;
 use std::io::Read;
-use tauri::{AppHandle, Emitter, Listener, Manager, WindowEvent};
+use std::path::PathBuf;
+use tauri::{AppHandle, Emitter, Listener, Manager, WebviewUrl, WindowEvent};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_store::StoreExt;
 use tauri_plugin_updater::{Update, UpdaterExt};
@@ -255,43 +256,53 @@ async fn check_update(app: AppHandle) -> CheckUpdateResult {
 }
 
 fn update_app(app: AppHandle, update_info: Update) {
-    let app_handle = app.clone();
-    let update_window = app.get_webview_window("update").unwrap();
-    update_window.show().unwrap();
-    update_window
-        .emit(
-            "show-update-window",
-            &[CheckUpdateResult {
-                status: true,
-                version: update_info.clone().version,
-                body: update_info.clone().body.unwrap(),
-            }],
-        )
-        .unwrap();
-    update_window.on_window_event(move |event| {
-        if let WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
+    if let Some(update_window) = app.get_webview_window("update") {
+        update_window.close().unwrap();
+    }
 
-            let app = app_handle.clone();
-            let update_window = app.get_webview_window("update").unwrap();
-            update_window.hide().unwrap();
-        }
-    });
+    let window = tauri::webview::WebviewWindowBuilder::new(
+        &app,
+        "update",
+        WebviewUrl::App(PathBuf::from("index.html#/update")),
+    )
+    .title("软件更新")
+    .inner_size(500.0, 400.0)
+    .min_inner_size(500.0, 400.0)
+    .center()
+    .build()
+    .unwrap();
 
     let app_handle = app.clone();
-    update_window.listen("download-update", move |_| {
+    let update_info_clone = update_info.clone();
+    window.listen("download-update", move |_| {
         let handle = app_handle.clone();
-        let update_info = update_info.clone();
+        let update_info = update_info_clone.clone();
         tauri::async_runtime::spawn(async move {
             update(handle, update_info).await.unwrap();
         });
     });
 
     let app_handle = app.clone();
-    update_window.listen("cancel-update", move |_| {
+    window.listen("cancel-update", move |_| {
         let app = app_handle.clone();
         let update_window = app.get_webview_window("update").unwrap();
-        update_window.hide().unwrap();
+        update_window.close().unwrap();
+    });
+
+    window.listen("window-ready", move |_| {
+        let update_window = app.get_webview_window("update").unwrap();
+        let update_info = update_info.clone();
+        update_window
+            .emit_to(
+                "update",
+                "show-update-window",
+                &[CheckUpdateResult {
+                    status: true,
+                    version: update_info.version,
+                    body: update_info.body.unwrap(),
+                }],
+            )
+            .unwrap();
     });
 }
 
@@ -311,7 +322,8 @@ async fn update(app: AppHandle, update: Update) -> tauri_plugin_updater::Result<
                 downloaded += chunk_length;
                 println!("下载中: {downloaded}/{content_length:?}");
                 update_window
-                    .emit(
+                    .emit_to(
+                        "update",
                         "downloading-update",
                         &[DownloadPercentage {
                             downloaded,
@@ -323,7 +335,7 @@ async fn update(app: AppHandle, update: Update) -> tauri_plugin_updater::Result<
             || {
                 println!("下载完成");
                 update_window
-                    .emit("download-update-complete", &[] as &[()])
+                    .emit_to("update", "download-update-complete", &[] as &[()])
                     .unwrap();
             },
         )

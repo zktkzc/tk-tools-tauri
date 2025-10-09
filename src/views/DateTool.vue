@@ -42,7 +42,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-[calc(100vh-68px)] px-2 py-0 broder border-gray-500 flex flex-col justify-center">
+  <div class="w-full h-[calc(100vh-88px)] px-2 py-0 broder border-gray-500 flex flex-col justify-center">
     <div class="w-full h-[35px] flex items-center justify-between flex-wrap">
       <el-radio-group v-model="activeMenu" @change="handleChange">
         <el-radio v-for="item in menuList" :key="item.value" :value="item.value">
@@ -50,7 +50,7 @@ onMounted(() => {
         </el-radio>
       </el-radio-group>
     </div>
-    <div class="flex-1 w-full border dark:border-[#4C4D4F] rounded-md">
+    <div class="flex-1 w-full border dark:border-[#4C4D4F] rounded-md overflow-hidden">
       <router-view />
     </div>
   </div>

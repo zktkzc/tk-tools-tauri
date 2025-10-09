@@ -152,7 +152,7 @@ onUnmounted(() => {
           class="h-full border dark:border-[#4C4D4F] border-[#DCDFE6] hover:border-[#29a745] rounded-md"
       >
         <div class="h-full flex flex-col items-center justify-center p-2">
-          <el-button class="upload-btn" @click="selectFile">
+          <el-button class="button-with-bg" @click="selectFile">
             <template #icon>
               <upload-one/>
             </template>
@@ -189,8 +189,8 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="h-full flex items-center justify-start gap-2">
-      <el-button @click="copy(result)">复制</el-button>
-      <el-checkbox v-model="urlSafe" @change="() => {
+      <el-button class="button-no-bg" @click="copy(result)">复制</el-button>
+      <el-checkbox class="check-box-with-border" v-model="urlSafe" @change="() => {
         if (activeType === 'text') {
           handleInput(originValue)
         } else {
@@ -200,7 +200,7 @@ onUnmounted(() => {
       >
         Url安全
       </el-checkbox>
-      <el-checkbox v-model="hasPad" @change="() => {
+      <el-checkbox class="check-box-with-border" v-model="hasPad" @change="() => {
         if (activeType === 'text') {
           handleInput(originValue)
         } else {
@@ -265,77 +265,6 @@ onUnmounted(() => {
         border: #4c4d4f solid 1px !important;
       }
     }
-  }
-}
-
-:deep(.el-button) {
-  --el-button-bg-color: #ffffff;
-  --el-button-text-color: #515A6E;
-  --el-button-border-color: #dddfe5;
-  --el-button-hover-bg-color: #fff;
-  --el-button-hover-border-color: #23923d;
-  --el-button-hover-text-color: #23923d;
-  --el-button-active-bg-color: #ffffff;
-  --el-button-active-border-color: #23923d;
-
-  @media (prefers-color-scheme: dark) {
-    --el-button-bg-color: #252525;
-    --el-button-border-color: #4c4d4f;
-    --el-button-text-color: #bbc6ce;
-    --el-button-hover-bg-color: #252525;
-    --el-button-hover-border-color: #23923d;
-    --el-button-hover-text-color: #23923d;
-    --el-button-active-bg-color: #252525;
-    --el-button-active-border-color: #23923d;
-  }
-}
-
-:deep(.el-checkbox) {
-  @apply border text-[#515A6E] dark:border-[#4C4D4F] dark:text-[#BBC6CE] hover:border-[#29A745] hover:text-[#29A745]
-  m-0 px-2 rounded-md cursor-pointer;
-
-  &:hover {
-    .el-checkbox__inner {
-      @apply border-[#29A745];
-    }
-  }
-}
-
-:deep(.el-checkbox__inner) {
-  @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
-}
-
-.dropdown {
-  :deep(.el-button) {
-    @apply font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
-    --el-button-hover-border-color: #29a745;
-    --el-button-hover-text-color: #29a745;
-
-    &:hover {
-      border-color: #29a745 !important;
-      color: #29a745 !important;
-    }
-  }
-}
-
-:deep(.el-button) {
-  &.upload-btn {
-    --el-button-text-color: #fff;
-    --el-button-bg-color: #29a745;
-    --el-button-border-color: #29a745;
-    --el-button-hover-text-color: #fff;
-    --el-button-hover-bg-color: #23923d;
-    --el-button-hover-border-color: #23923d;
-    --el-button-active-bg-color: #23923d;
-    --el-button-active-border-color: #23923d;
   }
 }
 </style>

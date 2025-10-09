@@ -61,8 +61,8 @@ onUnmounted(() => {
           <div class="config-content border-none">
             <span class="w-[150px]">升级配置</span>
             <div class="flex items-center gap-4">
-              <el-checkbox label="启动时自动更新" v-model="settings.autoUpdate" @change="changeAutoUpdate"/>
-              <el-button class="w-[170px]" @click="checkUpdate">{{ updateBtnText }}</el-button>
+              <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings.autoUpdate" @change="changeAutoUpdate"/>
+              <el-button class="button-with-bg w-[170px]" @click="checkUpdate">{{ updateBtnText }}</el-button>
             </div>
           </div>
         </div>

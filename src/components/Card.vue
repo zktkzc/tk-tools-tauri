@@ -10,7 +10,7 @@ defineProps({
 <template>
   <div class="border dark:border-[#4C4D4F] rounded-md">
     <div
-      class="text-[#515A6E] dark:text-[#AEB9C0] dark:bg-[#333333] border-b dark:border-[#4C4D4F] p-2 text-sm"
+      class="text-[#515A6E] dark:text-[#AEB9C0] dark:bg-[#333333] border-b dark:border-[#4C4D4F] p-2 text-sm rounded-tl-md rounded-tr-md"
       style="user-select: none"
     >
       {{ title }}

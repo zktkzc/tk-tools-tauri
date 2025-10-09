@@ -119,7 +119,7 @@ onUnmounted(() => {
 }
 
 :deep(.el-menu-item) {
-  @apply h-[40px] w-full hover:bg-[#fff] dark:hover:bg-[#1B1B1B];
+  @apply h-[40px] w-full hover:bg-transparent;
   padding: 0 !important;
   --el-menu-active-color: #424242;
 
@@ -131,6 +131,12 @@ onUnmounted(() => {
     @apply w-full flex items-center justify-start pl-5 mx-2 py-1.5 rounded-md text-base
     dark:text-[#fff] hover:bg-[#EBEBEB] dark:hover:bg-[#363636];
 
+    &:hover {
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+
     span {
       @apply flex items-center justify-center mr-1.5 text-[#424242] dark:text-[#E4E4E4];
     }
@@ -139,6 +145,9 @@ onUnmounted(() => {
   &.is-active {
     .content {
       @apply bg-[#29a745] hover:bg-[#29a745] text-[#fff];
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
 
       span {
         @apply text-[#fff];
@@ -160,6 +169,9 @@ onUnmounted(() => {
 
       .config-wrapper {
         @apply px-2 bg-[#fff] dark:bg-[#262626];
+        box-shadow: inset 0 1px 2px #ffffff30,
+        0 1px 5px #00000030,
+        0 2px 10px #00000015;
 
         .config-content {
           @apply grid grid-cols-[auto_auto] py-3 border-b;
@@ -174,58 +186,13 @@ onUnmounted(() => {
 }
 
 :deep(.el-select) {
-  &:hover {
-    .el-select__placeholder {
-      @apply text-[#29A745];
-    }
-  }
-
   .el-select__wrapper {
     @apply dark:bg-[#373737] shadow-none hover:shadow-none border border-[#DCDFE6]
     dark:border-[#4C4D4F] hover:border-[#29a745];
   }
 
   .el-select__placeholder {
-    @apply text-[15px] text-black dark:text-[#fff] hover:text-[#29a745];
+    @apply text-[15px] text-black dark:text-[#fff];
   }
-}
-
-:deep(.el-checkbox) {
-  @apply text-black dark:text-white font-light hover:text-[#29A745] cursor-pointer;
-
-  &:hover {
-    .el-checkbox__inner {
-      @apply border-[#29A745];
-    }
-  }
-
-  .el-checkbox__inner {
-    @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
-  }
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
-}
-
-:deep(.el-button) {
-  @apply font-light;
-
-  --el-button-bg-color: #29A745;
-  --el-button-text-color: #fff;
-  --el-button-border-color: #29A745;
-  --el-button-hover-bg-color: #23923d;
-  --el-button-hover-border-color: #23923d;
-  --el-button-hover-text-color: #fff;
-  --el-button-active-bg-color: #23923d;
-  --el-button-active-border-color: #23923d;
-}
-
-:deep(.el-button+.el-button) {
-  margin-left: 0;
 }
 </style>

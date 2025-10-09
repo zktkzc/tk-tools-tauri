@@ -165,6 +165,7 @@ onUnmounted(() => {
         <div class="absolute bottom-1 right-1 flex items-center gap-1">
           <el-checkbox
             v-model="needQuotes"
+            class="check-box-with-border"
             style="height: 25px !important"
             label="添加引号"
             size="small"
@@ -187,23 +188,23 @@ onUnmounted(() => {
         </div>
         <el-checkbox
           v-model="needHyphen"
+          class="check-box-with-border"
           label="连接符(-)"
-          size="small"
           @change="handleHyphenChange"
         />
         <el-checkbox
           v-model="needUpperCase"
+          class="check-box-with-border"
           label="大写"
-          size="small"
           @change="handleUpperCaseChange"
         />
         <el-checkbox
           v-model="needToUint8"
+          class="check-box-with-border"
           label="Uint8数组"
-          size="small"
           @change="handleToUint8Change"
         />
-        <el-button class="w-[32px]" @click="generate">
+        <el-button class="button-no-bg w-[32px]" @click="generate">
           <refresh theme="outline" size="18" />
         </el-button>
       </div>
@@ -252,44 +253,6 @@ onUnmounted(() => {
   @apply dark:bg-[#333] border dark:border-[#4C4D4F] dark:text-[#919398] px-2;
   box-shadow: none !important;
   user-select: none;
-}
-
-:deep(.el-button) {
-  --el-button-bg-color: #ffffff;
-  --el-button-border-color: #dcdfe6;
-  --el-button-hover-bg-color: #ffffff;
-  --el-button-hover-border-color: #29a745;
-  --el-button-hover-text-color: #29a745;
-  --el-button-active-border-color: #29a745;
-
-  @media (prefers-color-scheme: dark) {
-    --el-button-bg-color: #202124;
-    --el-button-border-color: #4c4d4f;
-    --el-button-hover-bg-color: #202124;
-    --el-button-hover-border-color: #29a745;
-    --el-button-hover-text-color: #29a745;
-    --el-button-active-border-color: #29a745;
-  }
-}
-
-:deep(.el-checkbox) {
-  @apply border text-[#515A6E] hover:border-[#29A745] dark:border-[#4C4D4F] dark:text-[#BBC6CE] dark:hover:border-[#29A745] dark:hover:text-[#29A745]
-  m-0 px-2 rounded-md cursor-pointer;
-
-  --el-checkbox-input-border-color-hover: #29a745;
-  height: 32px !important;
-}
-
-:deep(.el-checkbox__inner) {
-  @apply dark:bg-[#202124] border dark:border-[#4C4D4F] dark:hover:border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
 }
 
 .setting-panel {

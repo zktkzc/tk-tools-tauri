@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {listen} from '@tauri-apps/api/event';
 import {computed, onMounted, ref} from "vue";
 import {SettingsType, UpdateInfoType} from "../types";
 import {set} from "../store/AppConfigStore.ts";
@@ -18,13 +17,18 @@ const downloadedSize = ref<number>(0)
 const totalSize = ref<number>(0)
 const bodyArray = computed(() => {
   if (!update.value || update.value.body === '') return ''
-
   return update.value.body.split(';').filter(v => v !== '')
 })
+const percentage = computed(() => {
+  if (totalSize.value === 0) return 0
+  return parseFloat((downloadedSize.value / totalSize.value * 100).toFixed(2))
+})
+const disabled = ref<boolean>(false)
 
-listen('show-update-window', ({payload}) => {
+getCurrentWebviewWindow().listen('show-update-window', ({payload}) => {
   init()
   const {version, body} = (payload as any)[0]
+  console.log(version, body)
   update.value.version = version
   update.value.body = body
 })
@@ -45,17 +49,19 @@ const cancelUpdate = async () => {
 
 const downloadUpdate = async () => {
   await getCurrentWebviewWindow().emit('download-update')
+  disabled.value = true
 }
 
-listen('downloading-update', ({payload}) => {
+getCurrentWebviewWindow().listen('downloading-update', ({payload}) => {
   showProgressBar.value = true
   const {downloaded, total} = (payload as any)[0]
   downloadedSize.value = downloaded as number
   totalSize.value = total as number
 })
 
-listen('download-update-complete', () => {
+getCurrentWebviewWindow().listen('download-update-complete', () => {
   downloadedSize.value = totalSize.value
+  disabled.value = false
 })
 
 const init = () => {
@@ -63,10 +69,12 @@ const init = () => {
   showProgressBar.value = false
   downloadedSize.value = 0
   totalSize.value = 0
+  disabled.value = false
 }
 
 onMounted(() => {
   init()
+  getCurrentWebviewWindow().emitTo('update', 'window-ready')
 })
 </script>
 
@@ -94,16 +102,17 @@ onMounted(() => {
         </div>
       </div>
       <div class="">
-        <el-checkbox label="启动时自动更新" v-model="settings.autoUpdate" @change="changeAutoUpdate"/>
+        <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings.autoUpdate"
+                     @change="changeAutoUpdate"/>
       </div>
       <div class="w-full flex items-center justify-between mt-2">
         <div class="w-full mr-4">
-          <el-progress v-show="showProgressBar" :stroke-width="22" status="success" text-inside striped striped-flow
-                       :percentage="(downloadedSize / totalSize * 100).toFixed(0)"/>
+          <el-progress v-show="showProgressBar" :stroke-width="18" color="#29A745" text-inside striped striped-flow
+                       :percentage="percentage"/>
         </div>
         <div class="w-full flex items-center justify-end">
-          <el-button class="cancel-button" @click="cancelUpdate">稍后提示我</el-button>
-          <el-button class="update-button" @click="downloadUpdate">安装更新</el-button>
+          <el-button ref="btnRef" class="cancel-button" :disabled="disabled" @click="cancelUpdate">稍后提示我</el-button>
+          <el-button ref="btnRef" class="update-button" :disabled="disabled" @click="downloadUpdate">安装更新</el-button>
         </div>
       </div>
     </div>
@@ -111,31 +120,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-:deep(.el-checkbox) {
-  @apply text-black dark:text-white font-light hover:text-[#29A745] cursor-pointer;
-
-  &:hover {
-    .el-checkbox__inner {
-      @apply border-[#29A745];
-    }
-  }
-
-  .el-checkbox__inner {
-    @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
-    box-shadow: inset 0 1px 2px #ffffff30,
-    inset 0 1px 2px #00000030,
-    inset 0 2px 4px #00000015;
-  }
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
-}
-
 :deep(.el-button) {
   @apply font-light h-full p-0 m-0;
   box-shadow: inset 0 1px 2px #ffffff30,
@@ -155,5 +139,19 @@ onMounted(() => {
 
 :deep(.el-button+.el-button) {
   @apply ml-2;
+}
+
+:deep(.el-progress-bar) {
+  .el-progress-bar__outer {
+    @apply bg-transparent border border-[#ffffff30] rounded-md;
+
+    .el-progress-bar__inner {
+      @apply rounded-md text-[14px];
+
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import {onMounted, onUnmounted, ref, watch} from 'vue'
+import {ElMessage} from 'element-plus'
 import {eventBus} from "../utils/eventBus.ts";
 
 const padZero = (num: number) => {
@@ -39,8 +39,8 @@ const getUnixTimestampNanoseconds = (now: Date) => {
   let nanoPart = ''
   if (inputValue.value.toString().includes('.')) {
     nanoPart = inputValue.value
-      .toString()
-      .substring(inputValue.value.toString().lastIndexOf('.') + 4)
+        .toString()
+        .substring(inputValue.value.toString().lastIndexOf('.') + 4)
   }
   return now.getTime().toString() + nanoPart.padEnd(6, '0')
 }
@@ -66,7 +66,7 @@ const getStandardTimeNanoseconds = (nanosecondsTimestamp: string) => {
   // 6. 检查 Date 对象是否有效
   if (isNaN(date.getTime())) {
     throw new Error(
-      'Invalid date resulting from the timestamp. It might be out of the representable range.'
+        'Invalid date resulting from the timestamp. It might be out of the representable range.'
     )
   }
 
@@ -166,7 +166,7 @@ const result_ns = ref('')
 
 const copy = (value: string) => {
   navigator.clipboard.writeText(value)
-  ElMessage.success({ message: '复制成功', grouping: true, customClass: 'success' })
+  ElMessage.success({message: '复制成功', grouping: true, customClass: 'success'})
 }
 
 const load = (value: any) => {
@@ -187,11 +187,11 @@ const handleInput = () => {
     result_ms.value = getStandardTimeMilliseconds(date)
     result_ns.value = getStandardTimeNanoseconds(inputValue.value.toString())
   } else if (
-    inputValue.value
-      .toString()
-      .match(
-        /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d{0,9})?$/
-      )
+      inputValue.value
+          .toString()
+          .match(
+              /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d{0,9})?$/
+          )
   ) {
     let date: Date | null = null
     if (inputValue.value.toString().trim().endsWith('.')) {
@@ -211,11 +211,11 @@ const handleInput = () => {
 }
 
 watch(
-  () => inputValue.value,
-  () => {
-    handleInput()
-  },
-  { immediate: true, deep: true }
+    () => inputValue.value,
+    () => {
+      handleInput()
+    },
+    {immediate: true, deep: true}
 )
 
 const clear = () => {
@@ -234,37 +234,40 @@ onUnmounted(() => {
 <template>
   <div class="h-full w-full p-2 flex flex-col gap-2">
     <el-input
-      v-model="inputValue"
-      placeholder="支持 YYYY-MM-DD HH:mm:ss[.\d+] 与 时间戳(秒/毫秒/纳秒)输入"
-      @input="handleInput"
+        v-model="inputValue"
+        placeholder="支持 YYYY-MM-DD HH:mm:ss[.\d+] 与 时间戳(秒/毫秒/纳秒)输入"
+        @input="handleInput"
     >
       <template #prepend>输入</template>
       <template #suffix>
-        <el-button type="primary" size="small" @click="clear">清除</el-button>
+        <el-button class="button-no-bg" size="small" @click="clear">清除</el-button>
       </template>
     </el-input>
     <el-input v-model="result_s" readonly>
       <template #prepend>秒</template>
       <template #suffix>
-        <el-button type="primary" size="small" @click="copy(result_s)">复制</el-button>
+        <el-button v-show="result_s && result_s !== ''" class="button-no-bg" size="small" @click="copy(result_s)">复制
+        </el-button>
       </template>
     </el-input>
     <div class="flex space-x-2">
       <el-input v-model="result_ms" readonly>
         <template #prepend>毫秒</template>
         <template #suffix>
-          <el-button type="primary" size="small" @click="result_ms">复制</el-button>
+          <el-button v-show="result_ms && result_ms !== ''" class="button-no-bg" size="small" @click="copy(result_ms)">复制
+          </el-button>
         </template>
       </el-input>
       <el-input v-model="result_ns" readonly>
         <template #prepend>纳秒</template>
         <template #suffix>
-          <el-button type="primary" size="small" @click="result_ns">复制</el-button>
+          <el-button v-show="result_ns && result_ns !== ''" class="button-no-bg" size="small" @click="copy(result_ns)">复制
+          </el-button>
         </template>
       </el-input>
     </div>
     <el-table :data="tableData" stripe style="user-select: none">
-      <el-table-column prop="type" label="格式" />
+      <el-table-column prop="type" label="格式"/>
       <el-table-column prop="value" label="值" class-name="table-value">
         <template #default="scope">
           <span @click="copy(scope.row.value)">
@@ -274,7 +277,7 @@ onUnmounted(() => {
       </el-table-column>
       <el-table-column label="操作" align="center" width="100px">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="load(scope.row.value)">加载</el-button>
+          <el-button class="button-no-bg" size="small" @click="load(scope.row.value)">加载</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -295,7 +298,6 @@ onUnmounted(() => {
   }
 }
 
-// 斑马条纹样式（需配合 stripe 属性）
 :deep(.el-table__row--striped td) {
   background-color: #f6f8f9 !important;
 
@@ -304,7 +306,6 @@ onUnmounted(() => {
   }
 }
 
-// 表体
 :deep(.el-table__body tr > td) {
   background-color: #ffffff;
   color: #535a6c;
@@ -315,7 +316,6 @@ onUnmounted(() => {
   }
 }
 
-// 行 hover 效果
 :deep(.el-table__body tr:hover > td) {
   background-color: #eaf5f1 !important;
 
@@ -347,28 +347,6 @@ onUnmounted(() => {
     color: #29a745 !important;
     text-decoration: underline;
     cursor: pointer;
-  }
-}
-
-:deep(.el-button--primary) {
-  --el-button-bg-color: #ffffff;
-  --el-button-text-color: #333;
-  --el-button-border-color: #dddfe5;
-  --el-button-hover-bg-color: #fff;
-  --el-button-hover-border-color: #23923d;
-  --el-button-hover-text-color: #23923d;
-  --el-button-active-bg-color: #ffffff;
-  --el-button-active-border-color: #23923d;
-
-  @media (prefers-color-scheme: dark) {
-    --el-button-bg-color: #252525;
-    --el-button-border-color: #4c4d4f;
-    --el-button-text-color: #bbc6ce;
-    --el-button-hover-bg-color: #252525;
-    --el-button-hover-border-color: #23923d;
-    --el-button-hover-text-color: #23923d;
-    --el-button-active-bg-color: #252525;
-    --el-button-active-border-color: #23923d;
   }
 }
 

@@ -1,16 +1,16 @@
 <template>
-  <div class="h-[calc(100vh-60px)] w-full flex flex-col items-center justify-between p-2 gap-2">
+  <div class="h-[calc(100vh-80px)] w-full flex flex-col items-center justify-between p-2 gap-2">
     <div
       class="flex-1 w-full dark:text-[#ccc] border rounded-md dark:border-[#4C4D4F] border-[#e5e7eb] overflow-auto"
     >
-      <div>
+      <div class="h-full w-full">
         <div ref="container" class="h-full w-full" />
       </div>
     </div>
     <div
       class="h-[40px] w-full border border-[#e5e7eb] dark:border-[#4C4D4F] rounded-md flex items-center justify-center gap-2 p-1"
     >
-      <el-checkbox v-model="data.options.lineWrap" @change="autoWrap">自动换行</el-checkbox>
+      <el-checkbox class="check-box-with-border" v-model="data.options.lineWrap" @change="autoWrap">自动换行</el-checkbox>
       <el-select
         v-model="data.options.revertControl"
         popper-class="custom-select"
@@ -231,32 +231,11 @@ onUnmounted(() => {
   }
 }
 
-:deep(.el-checkbox) {
-  @apply border text-[#515A6E] dark:border-[#4C4D4F] dark:text-[#BBC6CE] hover:border-[#29A745] hover:text-[#29A745]
-  m-0 px-2 rounded-md cursor-pointer;
-}
-
-:deep(.el-checkbox__inner) {
-  @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F] hover:border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
-}
-
 :deep(.el-select__wrapper) {
   @apply dark:bg-[#252525] shadow-none hover:shadow-none border border-[#DCDFE6] dark:border-[#4C4D4F] hover:border-[#29a745];
 }
 
 :deep(.el-select__placeholder) {
   @apply text-[#545C70] dark:text-[#bbc6ce] hover:text-[#29a745];
-}
-
-:deep(.el-form-item__label) {
-  @apply text-[#545C70] dark:text-[#bbc6ce];
 }
 </style>

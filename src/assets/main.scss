@@ -143,4 +143,116 @@
       }
     }
   }
+
+  .el-checkbox.check-box-with-border {
+    @apply border text-[#515A6E] dark:border-[#4C4D4F] dark:text-[#BBC6CE] hover:border-[#29A745] hover:text-[#29A745]
+    m-0 px-2 rounded-md cursor-pointer;
+
+    &:hover {
+      .el-checkbox__inner {
+        @apply border-[#29A745];
+      }
+    }
+
+    .el-checkbox__inner {
+      @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
+      box-shadow: inset 0 1px 2px #ffffff30,
+      inset 0 1px 2px #00000030,
+      inset 0 2px 4px #00000015;
+    }
+
+    .el-checkbox__input.is-checked .el-checkbox__inner {
+      @apply bg-[#29A745] border border-[#29A745];
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+
+    .el-checkbox__input.is-checked + .el-checkbox__label {
+      @apply text-[#29A745];
+    }
+  }
+
+  .el-checkbox.check-box-no-border {
+    @apply text-black dark:text-white font-light hover:text-[#29A745] cursor-pointer;
+
+    &:hover {
+      .el-checkbox__inner {
+        @apply border-[#29A745];
+      }
+    }
+
+    .el-checkbox__inner {
+      @apply dark:bg-[#202124] border border-[#DCDFE6] dark:border-[#4C4D4F];
+      box-shadow: inset 0 1px 2px #ffffff30,
+      inset 0 1px 2px #00000030,
+      inset 0 2px 4px #00000015;
+    }
+
+    .el-checkbox__input.is-checked .el-checkbox__inner {
+      @apply bg-[#29A745] border border-[#29A745];
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+
+    .el-checkbox__input.is-checked + .el-checkbox__label {
+      @apply text-[#29A745];
+    }
+  }
+
+  .el-button.button-no-bg {
+    &:hover, &:active {
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+
+    --el-button-bg-color: #ffffff;
+    --el-button-text-color: #515A6E;
+    --el-button-border-color: #dddfe5;
+    --el-button-hover-bg-color: #23923d;
+    --el-button-hover-border-color: #23923d;
+    --el-button-hover-text-color: #fff;
+    --el-button-active-bg-color: #23923d;
+    --el-button-active-border-color: #23923d;
+
+    @media (prefers-color-scheme: dark) {
+      --el-button-bg-color: #252525;
+      --el-button-border-color: #4c4d4f;
+      --el-button-text-color: #bbc6ce;
+    }
+  }
+
+  .el-button.button-with-bg {
+    box-shadow: inset 0 1px 2px #ffffff30,
+    0 1px 2px #00000030,
+    0 2px 4px #00000015;
+
+    --el-button-text-color: #fff;
+    --el-button-bg-color: #29a745;
+    --el-button-border-color: #29a745;
+    --el-button-hover-bg-color: #23923d;
+    --el-button-hover-text-color: #fff;
+    --el-button-hover-border-color: #23923d;
+    --el-button-active-bg-color: #23923d;
+    --el-button-active-border-color: #23923d;
+  }
+
+  .el-button + .el-button {
+    margin-left: 0;
+  }
+
+  .dropdown {
+    .el-button {
+      @apply dark:bg-[#222] font-normal dark:text-[#B7C3CB] dark:border-[#4c4d4f];
+      --el-button-hover-border-color: #29a745;
+      --el-button-hover-text-color: #29a745;
+
+      &:hover {
+        border-color: #29a745 !important;
+        color: #29a745 !important;
+      }
+    }
+  }
 }

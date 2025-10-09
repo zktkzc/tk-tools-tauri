@@ -48,7 +48,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="w-full h-[calc(100vh-60px)] p-2 pt-0 broder border-gray-500 flex flex-col justify-center">
+  <div class="w-full h-[calc(100vh-80px)] p-2 pt-0 broder border-gray-500 flex flex-col justify-center">
     <div class="w-full h-[35px] flex items-center justify-between flex-wrap">
       <el-radio-group v-model="activeMenu" @change="handleChange">
         <el-radio v-for="item in menuList" :key="item.value" :value="item.value">

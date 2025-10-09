@@ -138,7 +138,7 @@ analyzeDate()
 </script>
 
 <template>
-  <div class="h-full w-full p-2 flex flex-col justify-start gap-2 overflow-auto">
+  <div class="h-full w-full p-2 flex flex-col gap-2 overflow-auto">
     <Card title="差值计算器" class="dark:text-[#AEB9C0]">
       <div class="flex items-center gap-2 flex-wrap text-[#515A6E] dark:text-[#AEB9C0]">
         <el-input v-model="date1_1" style="width: 200px" @input="diffBetween" />

@@ -63,7 +63,12 @@ onMounted(() => {
 
 <style scoped lang="scss">
 :deep(.el-menu--horizontal) {
-  --el-menu-horizontal-height: 30px;
+  @apply border-none p-2;
+  box-shadow: inset 0 1px 2px #ffffff30,
+  inset 0 1px 2px #00000030,
+  inset 0 2px 4px #00000015;
+
+  --el-menu-horizontal-height: 50px;
   --el-menu-bg-color: #f7f7f7;
   --el-menu-text-color: #576173;
   --el-menu-hover-bg-color: rgba(226, 239, 235, 0.5);
@@ -78,6 +83,28 @@ onMounted(() => {
     --el-menu-hover-text-color: #bdc6cd;
     --el-menu-active-color: #29a745;
     --el-menu-border-color: #4c4d4f;
+  }
+
+  .el-menu-item {
+    @apply border-none rounded-md p-2;
+
+    &.is-active {
+      @apply bg-[#29a745] font-normal;
+      --el-menu-active-color: #fff;
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+
+    &:hover {
+      box-shadow: inset 0 1px 2px #ffffff30,
+      0 1px 2px #00000030,
+      0 2px 4px #00000015;
+    }
+  }
+
+  .el-menu-item + .el-menu-item {
+    @apply ml-2;
   }
 }
 </style>

@@ -138,7 +138,7 @@ watch(
           placeholder="输出..."
         />
         <div class="absolute bottom-1 right-1 flex items-center gap-1">
-          <el-checkbox v-model="needQuotes" label="添加引号" size="small" @change="handleResult" />
+          <el-checkbox class="check-box-with-border" v-model="needQuotes" label="添加引号" size="small" @change="handleResult" />
           <el-input v-model="split" class="split-input">
             <template #prepend>分隔符</template>
           </el-input>
@@ -157,7 +157,7 @@ watch(
             placeholder="请点击设置来配置字符..."
           />
           <el-button
-            class="w-[32px]"
+            class="button-no-bg w-[32px]"
             @click="
               () => {
                 showDialog = true
@@ -170,17 +170,17 @@ watch(
             </el-tooltip>
           </el-button>
         </div>
-        <div class="w-[130px]">
+        <div class="w-[200px]">
           <el-input v-model="length" type="number" min="0" @change="generate">
             <template #prepend>长度</template>
           </el-input>
         </div>
-        <div class="w-[130px]">
+        <div class="w-[200px]">
           <el-input v-model="count" type="number" min="0" @change="generate">
             <template #prepend>数量</template>
           </el-input>
         </div>
-        <el-button class="w-[32px]" @click="generate">
+        <el-button class="button-no-bg w-[32px]" @click="generate">
           <refresh theme="outline" size="18" />
         </el-button>
       </div>
@@ -235,43 +235,6 @@ watch(
   @apply dark:bg-[#333] border dark:border-[#4C4D4F] dark:text-[#919398] px-2;
   box-shadow: none !important;
   user-select: none;
-}
-
-:deep(.el-button) {
-  --el-button-bg-color: #ffffff;
-  --el-button-border-color: #dcdfe6;
-  --el-button-hover-bg-color: #ffffff;
-  --el-button-hover-border-color: #29a745;
-  --el-button-hover-text-color: #29a745;
-  --el-button-active-border-color: #29a745;
-
-  @media (prefers-color-scheme: dark) {
-    --el-button-bg-color: #202124;
-    --el-button-border-color: #4c4d4f;
-    --el-button-hover-bg-color: #202124;
-    --el-button-hover-border-color: #29a745;
-    --el-button-hover-text-color: #29a745;
-    --el-button-active-border-color: #29a745;
-  }
-}
-
-:deep(.el-checkbox) {
-  @apply border text-[#515A6E] hover:border-[#29A745] dark:border-[#4C4D4F] dark:text-[#BBC6CE] dark:hover:border-[#29A745] dark:hover:text-[#29A745]
-  m-0 px-2 rounded-md cursor-pointer;
-
-  --el-checkbox-input-border-color-hover: #29a745;
-}
-
-:deep(.el-checkbox__inner) {
-  @apply dark:bg-[#202124] border dark:border-[#4C4D4F] dark:hover:border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  @apply bg-[#29A745] border border-[#29A745];
-}
-
-:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
-  @apply text-[#29A745];
 }
 
 .characters-setting {

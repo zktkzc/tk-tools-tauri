@@ -40,9 +40,9 @@ const openGithub = async () => {
       </div>
     </div>
     <div class="w-[200px] mt-4 flex flex-col items-center justify-center gap-2">
-      <el-button class="w-full" @click="checkUpdate">{{ updateBtnText }}</el-button>
+      <el-button class="button-with-bg w-full" @click="checkUpdate">{{ updateBtnText }}</el-button>
       <el-button
-          class="w-full dark:bg-[#373737] dark:border-[#373737] dark:hover:bg-[#4F4F4F] dark:hover:border-[#4F4F4F]"
+          class="button-with-bg w-full dark:bg-[#373737] dark:border-[#373737] dark:hover:bg-[#4F4F4F] dark:hover:border-[#4F4F4F]"
           @click="openGithub"
       >
         Github仓库
