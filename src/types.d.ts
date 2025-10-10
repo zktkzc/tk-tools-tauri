@@ -9,8 +9,12 @@ export type HashResult = {
 export type LangType = 'json'
 
 export type SettingsType = {
-    theme: 'dark' | 'light' | 'system'
-    autoUpdate: boolean
+    appearance: {
+        theme: 'dark' | 'light' | 'system'
+    },
+    system: {
+        autoUpdate: boolean
+    }
 }
 
 export type JsonToolDataType = {

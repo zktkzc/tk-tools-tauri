@@ -5,17 +5,17 @@ import {onMounted, onUnmounted, ref} from "vue";
 import {SettingsType} from "../../types";
 import {getCurrentWebviewWindow} from "@tauri-apps/api/webviewWindow";
 import {useSettingsStore} from "../../store/useSettingsStore.ts";
-import {set} from "../../store/AppConfigStore.ts";
+import {set, get} from "../../store/AppConfigStore.ts";
 
 const {setSettings, getSettings} = useSettingsStore()
 const updateBtnText = ref<string>('检查更新')
-const settings = ref<SettingsType>({} as SettingsType)
+const settings = ref<SettingsType>(getSettings())
 const themeMode = computedAsync(async () => {
   return await invoke('get_theme')
 })
 
 const changeAutoUpdate = async (value: boolean) => {
-  settings.value.autoUpdate = value
+  settings.value.system.autoUpdate = value
   await storeSettings()
 }
 
@@ -43,8 +43,13 @@ const storeSettings = async () => {
   await set('settings', settings.value)
 }
 
+const init = async () => {
+  const oldSettings = await get('settings') as SettingsType
+  setSettings(oldSettings)
+}
+
 onMounted(() => {
-  settings.value = getSettings()
+  init()
 })
 
 onUnmounted(() => {
@@ -61,7 +66,7 @@ onUnmounted(() => {
           <div class="config-content border-none">
             <span class="w-[150px]">升级配置</span>
             <div class="flex items-center gap-4">
-              <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings.autoUpdate" @change="changeAutoUpdate"/>
+              <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings.system.autoUpdate" @change="changeAutoUpdate"/>
               <el-button class="button-with-bg w-[170px]" @click="checkUpdate">{{ updateBtnText }}</el-button>
             </div>
           </div>

@@ -51,7 +51,7 @@ const openConfigWindow = async () => {
       minWidth: 700,
       minHeight: 500,
       center: true,
-      theme: theme,
+      theme: theme || undefined,
       url: "#/config"
     })
 

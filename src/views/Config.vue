@@ -17,7 +17,7 @@ const indexPathMap = [
 
 const router = useRouter()
 const {setSettings, getSettings} = useSettingsStore()
-const settings = ref<SettingsType>({} as SettingsType)
+const settings = ref<SettingsType>(getSettings())
 const themeMode = computedAsync(async () => {
   return await invoke('get_theme')
 })
@@ -33,14 +33,7 @@ const handleSelect = (key: string, _keyPath: string[]) => {
 
 const initSettings = async () => {
   let oldSettings = await get('settings') as SettingsType
-  if (!oldSettings) {
-    oldSettings = getSettings()
-  }
-  if (!oldSettings.theme) oldSettings.theme = 'system'
-  if (oldSettings.autoUpdate === undefined) oldSettings.autoUpdate = true
-  settings.value = oldSettings
-  await set('settings', settings.value)
-  await storeSettings()
+  await setSettings(oldSettings)
 }
 
 const storeSettings = async () => {

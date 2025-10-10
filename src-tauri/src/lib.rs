@@ -1,6 +1,6 @@
 use base64::Engine;
 use hex::encode;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha1::Digest;
 use std::fs;
 use std::io::Read;
@@ -356,6 +356,68 @@ async fn update(app: AppHandle, update: Update) -> tauri_plugin_updater::Result<
     Ok(())
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+struct SettingsType {
+    appearance: AppearanceType,
+    system: SystemType,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct AppearanceType {
+    theme: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct SystemType {
+    #[serde(rename = "autoUpdate")]
+    auto_update: bool,
+}
+
+fn read_config_json_file(app: AppHandle) {
+    // 读取配置文件，设置窗口主题
+    let store = match app.store("config.json") {
+        Ok(s) => Some(s),
+        Err(_) => None,
+    };
+
+    if store.is_some() {
+        let store = store.unwrap();
+        match store.get("settings") {
+            Some(settings) => {
+                if let Some(appearance) = settings["appearance"].as_object() {
+                    if let Some(theme) = appearance["theme"].as_str() {
+                        change_theme(app.clone(), theme)
+                    }
+                }
+
+                // 软件启动时检测更新
+                if let Some(system) = settings["system"].as_object() {
+                    if let Some(auto_update) = system["autoUpdate"].as_bool() {
+                        if auto_update {
+                            let handle = app.clone();
+                            tauri::async_runtime::spawn(async move {
+                                check_update(handle).await;
+                            });
+                        }
+                    }
+                }
+
+                store.close_resource();
+            }
+            None => {
+                let settings: SettingsType = serde_json::from_str(
+                    r#"{"appearance":{"theme":"system"},"system":{"autoUpdate":true}}"#,
+                )
+                .unwrap();
+                store.set("settings", serde_json::to_value(settings).unwrap());
+                store.save().unwrap();
+                read_config_json_file(app);
+                return;
+            }
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -392,36 +454,8 @@ pub fn run() {
                 }
             });
 
-            // 读取配置文件，设置窗口主题
-            let store = match app.store("config.json") {
-                Ok(s) => Some(s),
-                Err(_) => None,
-            };
-
-            if store.is_some() {
-                let store = store.unwrap();
-                match store.get("settings") {
-                    Some(settings) => {
-                        if let Some(theme) = settings["theme"].as_str() {
-                            change_theme(app.handle().clone(), theme)
-                        }
-
-                        // 软件启动时检测更新
-                        if let Some(auto_update) = settings["autoUpdate"].as_bool() {
-                            if auto_update {
-                                let handle = app.handle().clone();
-                                tauri::async_runtime::spawn(async move {
-                                    check_update(handle).await;
-                                });
-                            }
-                        }
-
-                        store.close_resource();
-                    }
-                    None => {}
-                }
-            }
-
+            // 读取配置文件config.json
+            read_config_json_file(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())

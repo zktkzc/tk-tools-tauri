@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
 import {SettingsType, UpdateInfoType} from "../types";
-import {set} from "../store/AppConfigStore.ts";
+import {get, set} from "../store/AppConfigStore.ts";
 import {useSettingsStore} from "../store/useSettingsStore.ts";
 import {Dot} from '@icon-park/vue-next'
 import {getCurrentWebviewWindow} from "@tauri-apps/api/webviewWindow";
@@ -11,7 +11,7 @@ const update = ref<UpdateInfoType>({
   body: ''
 })
 const {setSettings, getSettings} = useSettingsStore()
-const settings = ref<SettingsType>({} as SettingsType)
+const settings = ref<SettingsType>(getSettings())
 const showProgressBar = ref<boolean>(false)
 const downloadedSize = ref<number>(0)
 const totalSize = ref<number>(0)
@@ -28,19 +28,22 @@ const disabled = ref<boolean>(false)
 getCurrentWebviewWindow().listen('show-update-window', ({payload}) => {
   init()
   const {version, body} = (payload as any)[0]
-  console.log(version, body)
   update.value.version = version
   update.value.body = body
 })
 
 const storeSettings = async () => {
-  setSettings(settings.value)
-  await set('settings', settings.value)
+  if (settings.value) {
+    setSettings(settings.value)
+    await set('settings', settings.value)
+  }
 }
 
 const changeAutoUpdate = async (value: boolean) => {
-  settings.value.autoUpdate = value
-  await storeSettings()
+  if (settings.value) {
+    settings.value.system.autoUpdate = value
+    await storeSettings()
+  }
 }
 
 const cancelUpdate = async () => {
@@ -64,8 +67,9 @@ getCurrentWebviewWindow().listen('download-update-complete', () => {
   disabled.value = false
 })
 
-const init = () => {
-  settings.value = getSettings()
+const init = async () => {
+  const oldSettings = await get('settings') as SettingsType
+  setSettings(oldSettings)
   showProgressBar.value = false
   downloadedSize.value = 0
   totalSize.value = 0
@@ -102,7 +106,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="">
-        <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings.autoUpdate"
+        <el-checkbox class="check-box-no-border" label="启动时自动更新" v-model="settings!.system.autoUpdate"
                      @change="changeAutoUpdate"/>
       </div>
       <div class="w-full flex items-center justify-between mt-2">
