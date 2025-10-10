@@ -35,10 +35,6 @@ const initSettings = async () => {
   let oldSettings = await get('settings') as SettingsType
   if (!oldSettings) {
     oldSettings = getSettings()
-
-    if (oldSettings.theme) {
-      await invoke('change_theme', {value: oldSettings.theme})
-    }
   }
   if (!oldSettings.theme) oldSettings.theme = 'system'
   if (oldSettings.autoUpdate === undefined) oldSettings.autoUpdate = true
@@ -48,8 +44,8 @@ const initSettings = async () => {
 }
 
 const storeSettings = async () => {
-  setSettings(settings.value)
   await set('settings', settings.value)
+  setSettings(settings.value)
 }
 
 let unlisten = await getCurrentWebviewWindow().onThemeChanged(({payload: theme}) => {

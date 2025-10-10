@@ -157,7 +157,7 @@ onUnmounted(() => {
           class="h-full w-full border dark:border-[#4C4D4F] border-[#DCDFE6] hover:border-[#29a745] rounded-md"
       >
         <div class="h-full w-full flex flex-col items-center justify-center">
-          <el-button class="upload-btn" @click="selectFile">
+          <el-button class="button-with-bg" @click="selectFile">
             <template #icon>
               <upload-one/>
             </template>

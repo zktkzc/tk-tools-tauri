@@ -43,6 +43,7 @@ const openConfigWindow = async () => {
   const windows = await getAllWebviewWindows()
   window = windows.find(window => window.label === 'config')
   if (!window) {
+    const theme = await getCurrentWebviewWindow().theme()
     window = new WebviewWindow('config', {
       title: "软件设置",
       width: 700,
@@ -50,6 +51,7 @@ const openConfigWindow = async () => {
       minWidth: 700,
       minHeight: 500,
       center: true,
+      theme: theme,
       url: "#/config"
     })
 

@@ -31,6 +31,7 @@ let unlisten = await getCurrentWebviewWindow().onThemeChanged(({payload: theme})
 
 onMounted(() => {
   settings.value = getSettings()
+  console.log(settings.value)
 })
 
 onUnmounted(() => {
